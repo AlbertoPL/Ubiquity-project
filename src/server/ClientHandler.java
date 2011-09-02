@@ -47,11 +47,11 @@ public class ClientHandler implements Messageable, Runnable {
 		Message m; //declared in case its needed
 		switch(code) {
 		case MessageCode.INDEX_REQUEST:
-			m = new Message(MessageCode.SERVER_INDEX_REQUEST_ACK, null);
+			m = new Message(MessageCode.SERVER_INDEX_REQUEST_ACK, String.valueOf(FileServer.PORT));
 			sender.enqueueMessage(m);
 			break;
 		case MessageCode.FILE_REQUEST:
-			m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, null);
+			m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, String.valueOf(FileServer.PORT));
 			sender.enqueueMessage(m);
 			break;
 		case MessageCode.SENDING_INDEX:

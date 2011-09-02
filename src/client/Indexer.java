@@ -4,8 +4,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import message.Message;
+import message.MessageCode;
 
 
 
@@ -41,7 +45,7 @@ public class Indexer implements Runnable {
 	 * @param root
 	 */
 	private void index(File root) {
-		if (root.canRead()) {
+		if (root.canRead() && !root.getName().equalsIgnoreCase(".ubiquity")) {
 			try {
 				if (root.listFiles() != null) {
 					for (File f: root.listFiles()) {
@@ -49,107 +53,228 @@ public class Indexer implements Runnable {
 							index(f);
 						}
 						else if (f.getName().contains(".")){
+							
 							String filename = f.getAbsolutePath() + System.getProperty("file.separator") + f.getName();
 							//System.out.println(filename);
 	
 							if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mp3")) {
 								if (!music.contains(filename)) {
 									music.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "music");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".wav")) {
 								if (!music.contains(filename)) {
 									music.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "music");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mid")) {
 								if (!music.contains(filename)) {
 									music.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "music");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".doc")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".odt")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".ppt")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".xls")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".pptx")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".xlsx")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".docx")) {
 								if (!documents.contains(filename)) {
 									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mpeg")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".avi")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mkv")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mp4")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".ogg")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".ogm")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".flv")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".m4v")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".f4v")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".ifo")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "videos");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 						}
@@ -179,6 +304,12 @@ public class Indexer implements Runnable {
 		
 		//just for debugging purposes
 		spitToFile();
+		
+		//enqueue the database file 
+		if (client.getMessageSender() != null) {
+			Message m = new Message(MessageCode.FILE_REQUEST, System.getProperty("user.home") + "/.ubiquity/UbiquityIndex/");
+			client.getMessageSender().enqueueMessage(m);
+		}
 	}
 	
 	private void spitToFile() {

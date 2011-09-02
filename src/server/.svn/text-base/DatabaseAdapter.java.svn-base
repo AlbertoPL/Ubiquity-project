@@ -1,0 +1,12 @@
+package server;
+
+/**
+ * 
+ * @author Alberto Pareja-Lecaros
+ *
+ * The DatabaseAdapter acts as a bridge between the server code and the database.
+ * 
+ */
+public class DatabaseAdapter {
+
+}

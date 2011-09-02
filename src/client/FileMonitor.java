@@ -32,6 +32,8 @@ public class FileMonitor implements Runnable {
 			watchID = JNotify.addWatch(path, mask, watchSubtree, new Listener());
 		} catch (JNotifyException e) {
 			e.printStackTrace();
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 
 	}

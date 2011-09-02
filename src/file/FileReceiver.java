@@ -2,18 +2,15 @@ package file;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import message.Message;
-import message.MessageReceiver;
-import message.MessageSender;
 import message.Messageable;
 
 public class FileReceiver implements Runnable {
@@ -95,7 +92,9 @@ public class FileReceiver implements Runnable {
 			Message m = dequeueMessage();
 			byte[] mybytearray = new byte[BUFFER];
 			try {
-				FileOutputStream fos = new FileOutputStream(m.getPayload(),
+				File f = new File(m.getPayload());
+				String localName = f.getName();
+				FileOutputStream fos = new FileOutputStream(localName,
 						false);
 				BufferedOutputStream bos = new BufferedOutputStream(fos);
 				long fileLength = in.readLong();

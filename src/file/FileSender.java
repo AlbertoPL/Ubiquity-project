@@ -112,33 +112,47 @@ public class FileSender implements Runnable {
 		if (connectTries < CONNECT_TRIES) {
 			connected = true;
 		}
-		while (connected && !fileMessageQueue.isEmpty() && out != null) {
+		
+		boolean sentOneFile = false;
+		
+		while (connected && (!sentOneFile || !fileMessageQueue.isEmpty()) && out != null) {
 			Message m = dequeueMessage();
 			byte[] mybytearray = new byte[BUFFER];
-			try {
-				File f = new File(m.getPayload());
-				if (f.exists()) {
-					FileInputStream fin = new FileInputStream(f);
-				    BufferedInputStream bin = new BufferedInputStream(fin);
-					long fileLength = f.length();
-					out.writeLong(fileLength);
-					out.flush();
-					int bytesRead;
-				    while (fileLength > 0) {
-				    	if (fileLength > BUFFER) {
-					    	bytesRead = bin.read(mybytearray);
+			if (m != null) {
+				try {
+					File f = new File(m.getPayload());
+					if (f.exists()) {
+						FileInputStream fin = new FileInputStream(f);
+					    BufferedInputStream bin = new BufferedInputStream(fin);
+						long fileLength = f.length();
+						out.writeLong(fileLength);
+						out.flush();
+						int bytesRead;
+					    while (fileLength > 0) {
+					    	if (fileLength > BUFFER) {
+						    	bytesRead = bin.read(mybytearray);
+						    }
+						    else {
+						    	bytesRead = bin.read(mybytearray, 0, (int)fileLength);
+						    }
+						    fileLength -= bytesRead;
+						    out.write(mybytearray, 0, bytesRead);
+						    out.flush();
 					    }
-					    else {
-					    	bytesRead = bin.read(mybytearray, 0, (int)fileLength);
-					    }
-					    fileLength -= bytesRead;
-					    out.write(mybytearray, 0, bytesRead);
-					    out.flush();
-				    }
-				    bin.close();
+					    bin.close();
+					    sentOneFile = true;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			}
+			else {
+				try {
+					Thread.sleep(3000);//sleep 3 seconds
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		stop();

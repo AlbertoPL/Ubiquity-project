@@ -14,6 +14,15 @@ public class UbiquityFile extends File {
 		dbID = -1; //this means its not in the database
 	}
 	
+	public UbiquityFile(String file, String filetype) {
+		super(file);
+		this.filetype = filetype;
+	}
+	
+	public void setDbID(int dbID) {
+		this.dbID = dbID;
+	}
+	
 	public String getFileType() {
 		return filetype;
 	}

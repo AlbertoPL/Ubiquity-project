@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/ubiquity/!svn/ver/97/Ubiquity/src/message
+END
+MessageCode.java
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/ubiquity/!svn/ver/97/Ubiquity/src/message/MessageCode.java
+END
+Message.java
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/ubiquity/!svn/ver/94/Ubiquity/src/message/Message.java
+END
+MessageSender.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/ubiquity/!svn/ver/94/Ubiquity/src/message/MessageSender.java
+END
+Messageable.java
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/ubiquity/!svn/ver/97/Ubiquity/src/message/Messageable.java
+END
+MessageReceiver.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/ubiquity/!svn/ver/95/Ubiquity/src/message/MessageReceiver.java
+END

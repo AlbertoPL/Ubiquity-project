@@ -70,7 +70,7 @@ public class Database {
 	
 	public int addNewFileToDB(UbiquityFile f) throws SQLException {
 		PreparedStatement stmtSaveNewRecord = dbConnection.prepareStatement(
-			    "INSERT INTO FILE " +
+			    "INSERT INTO APP.FILE " +
 			    "   (FILENAME, FILEPATH, FILETYPE, " +
 			    "    FILESIZE) " +
 			    "VALUES (?, ?, ?, ?)",

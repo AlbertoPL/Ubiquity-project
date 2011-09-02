@@ -332,6 +332,10 @@ public class Client implements Messageable, Runnable {
 		return null;
 	}
 	
+	public MessageSender getMessageSender() {
+		return sender;
+	}
+	
 	@Override
 	public InputStream getFileInputStream() {
 		try {

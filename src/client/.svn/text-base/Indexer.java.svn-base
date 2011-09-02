@@ -1,0 +1,20 @@
+package client;
+
+/**
+ * 
+ * @author Alberto Pareja-Lecaros
+ *
+ * The Indexer both traverses the file system, indexing each file, and also 
+ * monitors the file system for changes. These updates are sent to the client 
+ * to deal with.
+ *
+ */
+public class Indexer implements Runnable {
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
