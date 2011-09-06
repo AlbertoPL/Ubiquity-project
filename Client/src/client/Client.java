@@ -51,6 +51,7 @@ public class Client implements Messageable, Runnable {
 	private String hostname;
 	private boolean running;
 	private boolean connected;
+	private boolean loggedIn;
 	private Socket socket, fileSocket;
 	private FileSender fileSender;
 	private FileReceiver fileReceiver;
@@ -73,7 +74,7 @@ public class Client implements Messageable, Runnable {
 		indexer = new Indexer(this);
 		fileMonitor = new FileMonitor(this);
 		database = new Database();
-		
+		loggedIn = false;
 		connected = false;
 	}
 	
@@ -97,16 +98,24 @@ public class Client implements Messageable, Runnable {
 		 * 5. Server requests a file (same as client)
 		 * 6. Server sends master index (same as client)
 		 * 7. Server sends a file (same as client)
+		 * 11. Server says client is not logged in
 		 */
 		int code = message.getCode();
 		Thread t;
+		Message m;
 		switch(code) {
+		case MessageCode.NOT_LOGGED_IN:
+			int newCode = Integer.parseInt(message.getPayload().substring(0, message.getPayload().indexOf(" ")));
+			m = new Message(newCode, message.getPayload().substring(message.getPayload().indexOf(" ") + 1));
+			sender.enqueueMessage(m);
+			break;
 		case MessageCode.SERVER_REQUEST_AUTH:
 			login();
 			//TODO: Handle the case where the algorithm check fails (it shouldn't!)
 			break;
 		case MessageCode.SERVER_ACCEPT_AUTH:
-			System.out.println("Successfully logged in!");		
+			System.out.println("Successfully logged in!");
+			loggedIn = true;
 			break;
 		case MessageCode.SERVER_REJECT_AUTH:
 			JOptionPane.showMessageDialog(null, "Username and/or password are incorrect!", "Authentication Failed", JOptionPane.ERROR_MESSAGE);
@@ -120,7 +129,7 @@ public class Client implements Messageable, Runnable {
 			if (fileSender == null || fileSender.isStopped()) {
 				fileSender = new FileSender(this);
 			}
-			Message m = new Message(MessageCode.FILE_REQUEST, "index.dex"); //TODO: change hardcoded index file location
+			m = new Message(MessageCode.FILE_REQUEST, "index.dex"); //TODO: change hardcoded index file location
 			fileSender.enqueueMessage(m);
 			t = new Thread(fileSender);
 			t.start();
@@ -163,7 +172,7 @@ public class Client implements Messageable, Runnable {
 				}
 			}
 			if (fileSocket != null) {
-				if (fileSender == null || fileSender.isStopped()) {
+				if (fileSender == null) {
 					try {
 						fileSender = new FileSender(this, fileSocket.getOutputStream());
 					} catch (IOException e) {
@@ -172,8 +181,10 @@ public class Client implements Messageable, Runnable {
 				}
 				m = new Message(MessageCode.FILE_REQUEST, "index.dex"); //TODO: change hardcoded index file location
 				fileSender.enqueueMessage(m);
-				t = new Thread(fileSender);
-				t.start();
+				if (fileSender.isStopped()) {
+					t = new Thread(fileSender);
+					t.start();
+				}
 			}
 			break;
 		case MessageCode.SERVER_FILE_REQUEST_ACK:
@@ -189,7 +200,7 @@ public class Client implements Messageable, Runnable {
 				}
 			}
 			if (fileSocket != null) {
-				if (fileSender == null || fileSender.isStopped()) {
+				if (fileSender == null) {
 					try {
 						fileSender = new FileSender(this, fileSocket.getOutputStream());
 					} catch (IOException e) {
@@ -197,8 +208,10 @@ public class Client implements Messageable, Runnable {
 					}
 				}
 				fileSender.enqueueMessage(message);
-				t = new Thread(fileSender);
-				t.start();
+				if (fileSender.isStopped()) {
+					t = new Thread(fileSender);
+					t.start();
+				}
 			}
 			break;
 		default:
@@ -243,7 +256,7 @@ public class Client implements Messageable, Runnable {
 			receiver = new MessageReceiver(this);
 			t = new Thread(receiver);
 			t.start();
-			
+
 			connected = true;
 			return true;
 		}
@@ -358,6 +371,10 @@ public class Client implements Messageable, Runnable {
 	
 	public boolean isConnected() {
 		return connected;
+	}
+	
+	public boolean isLoggedIn() {
+		return loggedIn;
 	}
 	
 	public Database getDatabase() {

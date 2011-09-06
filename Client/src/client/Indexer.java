@@ -307,7 +307,7 @@ public class Indexer implements Runnable {
 		
 		//enqueue the database file 
 		if (client.getMessageSender() != null) {
-			Message m = new Message(MessageCode.FILE_REQUEST, System.getProperty("user.home") + "/.ubiquity/UbiquityIndex/");
+			Message m = new Message(MessageCode.SENDING_FILE, System.getProperty("user.home") + "/.ubiquity/UbiquityIndex/");
 			client.getMessageSender().enqueueMessage(m);
 		}
 	}

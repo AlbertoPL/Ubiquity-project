@@ -17,6 +17,7 @@ public class ClientHandler implements Messageable, Runnable {
 
 	private boolean connected;
 	private boolean running;
+	private boolean loggedIn;
 	private MessageSender sender;
 	private MessageReceiver receiver;
 	private FileReceiver fileReceiver;
@@ -45,50 +46,65 @@ public class ClientHandler implements Messageable, Runnable {
 		int code = message.getCode();
 		Thread t; //declared in case its needed
 		Message m; //declared in case its needed
-		switch(code) {
-		case MessageCode.INDEX_REQUEST:
-			m = new Message(MessageCode.SERVER_INDEX_REQUEST_ACK, String.valueOf(FileServer.PORT));
-			sender.enqueueMessage(m);
-			break;
-		case MessageCode.FILE_REQUEST:
-			m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, String.valueOf(FileServer.PORT));
-			sender.enqueueMessage(m);
-			break;
-		case MessageCode.SENDING_INDEX:
-			if (fileReceiver == null || fileReceiver.isStopped()) {
-				fileReceiver = new FileReceiver(this);
-			}
-			m = new Message(MessageCode.SENDING_FILE, "index.dex"); //TODO: change hardcoded index file
-			fileReceiver.enqueueMessage(m);
-			t = new Thread(fileReceiver);
-			t.start();
-			break;
-		case MessageCode.SENDING_FILE:
-			if (fileReceiver == null || fileReceiver.isStopped()) {
-				fileReceiver = new FileReceiver(this);
-			}
-			fileReceiver.enqueueMessage(message);
-			t = new Thread(fileReceiver);
-			t.start();
-			break;
-		case MessageCode.CLIENT_SEND_AUTH:
-			String payload = message.getPayload();
-			//hardcoded for now
-			if ("Crowtche".equals(payload.substring(0, payload.indexOf(" "))) 
-					&& "6147273FFC253ABF34954F15203A1E47D9854BEC".equals(payload.
-							substring(payload.indexOf(" ")+ 1))) {
-				m = new Message(MessageCode.SERVER_ACCEPT_AUTH, null);
-			}
-			else {
-				loginTries++;
-				if (loginTries >= MAX_LOGIN_TRIES) {
-					m = new Message (MessageCode.SERVER_BLOCK_AUTH, null);
+		
+		if (!loggedIn) {
+			if (code == MessageCode.CLIENT_SEND_AUTH) {
+				String payload = message.getPayload();
+				//hardcoded for now
+				if ("Crowtche".equals(payload.substring(0, payload.indexOf(" "))) 
+						&& "6147273FFC253ABF34954F15203A1E47D9854BEC".equals(payload.
+								substring(payload.indexOf(" ")+ 1))) {
+					m = new Message(MessageCode.SERVER_ACCEPT_AUTH, null);
+					loggedIn = true;
 				}
 				else {
-					m = new Message(MessageCode.SERVER_REJECT_AUTH, null);
+					loginTries++;
+					if (loginTries >= MAX_LOGIN_TRIES) {
+						m = new Message (MessageCode.SERVER_BLOCK_AUTH, null);
+					}
+					else {
+						m = new Message(MessageCode.SERVER_REJECT_AUTH, null);
+					}
 				}
+				sender.enqueueMessage(m);
 			}
-			sender.enqueueMessage(m);
+			else {
+				String payload = message.getCode() + " " + message.getPayload();
+				m = new Message(MessageCode.NOT_LOGGED_IN, payload);
+			}
+		}
+		else {
+			switch(code) {
+			case MessageCode.INDEX_REQUEST:
+				m = new Message(MessageCode.SERVER_INDEX_REQUEST_ACK, String.valueOf(FileServer.PORT));
+				sender.enqueueMessage(m);
+				break;
+			case MessageCode.FILE_REQUEST:
+				m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, String.valueOf(FileServer.PORT));
+				sender.enqueueMessage(m);
+				break;
+			case MessageCode.SENDING_INDEX:
+				if (fileReceiver == null) {
+					fileReceiver = new FileReceiver(this);
+				}
+				m = new Message(MessageCode.SENDING_FILE, "index.dex"); //TODO: change hardcoded index file
+				fileReceiver.enqueueMessage(m);
+				if (fileReceiver.isStopped()) {
+					t = new Thread(fileReceiver);
+					t.start();
+				}
+				break;
+			case MessageCode.SENDING_FILE:
+				if (fileReceiver == null) {
+					fileReceiver = new FileReceiver(this);
+				}
+				fileReceiver.enqueueMessage(message);
+				if (fileReceiver.isStopped()) {
+					t = new Thread(fileReceiver);
+					t.start();
+				}
+				break;
+			}
 		}
 	}
 
@@ -189,6 +205,11 @@ public class ClientHandler implements Messageable, Runnable {
 	    		}
 	    	}
 	    }
+	}
+
+	@Override
+	public boolean isLoggedIn() {
+		return loggedIn;
 	}
 
 }

@@ -37,5 +37,7 @@ public interface Messageable {
 	
 	public boolean isConnected();
 	
+	public boolean isLoggedIn();
+	
 	public void receiverDisconnected();
 }

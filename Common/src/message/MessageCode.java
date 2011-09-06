@@ -17,4 +17,6 @@ public class MessageCode {
 	public static final int SERVER_INDEX_REQUEST_ACK = 9;
 	public static final int SERVER_FILE_REQUEST_ACK = 10;
 	
+	public static final int NOT_LOGGED_IN = 11; //client is not logged in
+	
 }

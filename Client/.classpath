@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="derby.jar"/>
 	<classpathentry kind="lib" path="jnotify-lib-0.93/jnotify-0.93.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Ubiquity/jnotify-lib-0.93"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Client/jnotify-lib-0.93"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/Common"/>

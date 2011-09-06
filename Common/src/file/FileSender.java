@@ -20,7 +20,7 @@ public class FileSender implements Runnable {
 	private boolean connected;
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private int filePort = 4442; //must be changed to a property later
+	private int filePort = 4442; //must be changed to a property later or set by server message
 	private final static int BUFFER = 2048;
 	private final static int CONNECT_TRIES = 3;
 	
@@ -83,10 +83,12 @@ public class FileSender implements Runnable {
 	
 	public void stop() {
 		running = false;
-		try {
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (socket != null) {
+			try {
+				socket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		if (serverSocket != null) {
 			try {
@@ -113,9 +115,7 @@ public class FileSender implements Runnable {
 			connected = true;
 		}
 		
-		boolean sentOneFile = false;
-		
-		while (connected && (!sentOneFile || !fileMessageQueue.isEmpty()) && out != null) {
+		if (connected) {
 			Message m = dequeueMessage();
 			byte[] mybytearray = new byte[BUFFER];
 			if (m != null) {
@@ -140,21 +140,15 @@ public class FileSender implements Runnable {
 						    out.flush();
 					    }
 					    bin.close();
-					    sentOneFile = true;
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			else {
-				try {
-					Thread.sleep(3000);//sleep 3 seconds
-				}
-				catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			stop();	
 		}
-		stop();
+		else {
+			System.err.println("Not connected!");
+		}
 	}
 }

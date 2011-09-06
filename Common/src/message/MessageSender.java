@@ -68,7 +68,7 @@ public class MessageSender implements Runnable {
 		while (running) {
 			while (master.isConnected() && out != null) {
 				Message m = dequeueMessage();
-				if (m != null) {
+				if (m != null && master.isLoggedIn()) {
 					try {
 						System.out.println("Sending message: " + m.getCode());
 						out.writeObject(m);
@@ -76,6 +76,20 @@ public class MessageSender implements Runnable {
 						e.printStackTrace();
 						connected = false;
 					}
+				}
+				//ok to send if we're asking for authentication
+				else if (m != null && (m.getCode() == MessageCode.SERVER_REQUEST_AUTH || m.getCode() == MessageCode.CLIENT_SEND_AUTH || m.getCode() == MessageCode.SERVER_ACCEPT_AUTH || m.getCode() == MessageCode.SERVER_REJECT_AUTH || m.getCode() == MessageCode.SERVER_BLOCK_AUTH)) {
+					try {
+						System.out.println("Sending message: " + m.getCode());
+						out.writeObject(m);
+					} catch (IOException e) {
+						e.printStackTrace();
+						connected = false;
+					}
+				}
+				else if (m != null && !master.isLoggedIn()) {
+					System.err.println("Will resend message later");
+					enqueueMessage(m);
 				}
 				else {
 					//sleep a bit
