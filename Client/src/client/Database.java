@@ -20,7 +20,7 @@ public class Database {
 	private void setDBSystemDir() {
 	    // Decide on the db system directory: <userhome>/.addressbook/
 	    String userHomeDir = System.getProperty("user.home", ".");
-	    String systemDir = userHomeDir + "/.ubiquity";
+	    String systemDir = userHomeDir + System.getProperty("file.separator") + ".ubiquity";
 
 	    // Set the db system directory.
 	    System.setProperty("derby.system.home", systemDir);
@@ -34,8 +34,8 @@ public class Database {
 		}
 		
 		String strUrl = "";
-		if (new File(System.getProperty("user.home") + "/.ubiquity/UbiquityIndex").exists()) {
-			strUrl = "jdbc:derby:UbiquityIndex;user=dbuser;password=dbuserpwd;";
+		if (new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".ubiquity" + System.getProperty("file.separator") + "UbiquityIndex").exists()) {
+			strUrl = "jdbc:derby:UbiquityIndex;";//user=dbuser;password=dbuserpwd;";
 			try {
 			    dbConnection = DriverManager.getConnection(strUrl);
 			} catch (SQLException sqle) {
@@ -43,7 +43,7 @@ public class Database {
 			}
 		}
 		else {
-			strUrl = "jdbc:derby:UbiquityIndex;user=dbuser;password=dbuserpwd;create=true";
+			strUrl = "jdbc:derby:UbiquityIndex;create=true";
 			try {
 			    dbConnection = DriverManager.getConnection(strUrl);
 			    createTables(dbConnection);
@@ -122,6 +122,23 @@ public class Database {
 	    stmtDeleteAddress.executeUpdate();
 	    bDeleted = true;
 	    return bDeleted;
+	}
+	
+	public boolean exportDatabase(String filename) throws SQLException {
+		boolean exported = false;
+		
+		PreparedStatement ps = dbConnection.prepareStatement(
+	    "CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (?,?,?,?,?,?)");
+	    ps.setString(1,null);
+	    ps.setString(2,"FILE");
+	    ps.setString(3,System.getProperty("user.home") + System.getProperty("file.separator") + ".ubiquity" + System.getProperty("file.separator") + filename);
+	    ps.setString(4,System.getProperty("line.separator"));
+	    ps.setString(5,null);
+	    ps.setString(6,null);
+	    ps.execute();
+		exported = true;
+		
+		return exported;
 	}
 	
 	public boolean isConnected() {

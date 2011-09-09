@@ -57,7 +57,7 @@ public class FileMonitor implements Runnable {
 	      print("created " + rootPath + " : " + name);
 	    }
 	    void print(String msg) {
-	      System.err.println(msg);
+	   //   System.err.println(msg);
 	    }
 	}
 }

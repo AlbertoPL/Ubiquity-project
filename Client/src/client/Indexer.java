@@ -305,9 +305,16 @@ public class Indexer implements Runnable {
 		//just for debugging purposes
 		spitToFile();
 		
+		//export database
+		try {
+			client.getDatabase().exportDatabase("dbexport.dex");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
 		//enqueue the database file 
 		if (client.getMessageSender() != null) {
-			Message m = new Message(MessageCode.SENDING_FILE, System.getProperty("user.home") + "/.ubiquity/UbiquityIndex/");
+			Message m = new Message(MessageCode.SENDING_INDEX, System.getProperty("user.home") + "/.ubiquity/dbexport.dex");
 			client.getMessageSender().enqueueMessage(m);
 		}
 	}

@@ -114,6 +114,8 @@ public class FileReceiver implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			//put database stuff in a separate thread and continue
 		}
 		stop();
 	}

@@ -87,8 +87,7 @@ public class ClientHandler implements Messageable, Runnable {
 				if (fileReceiver == null) {
 					fileReceiver = new FileReceiver(this);
 				}
-				m = new Message(MessageCode.SENDING_FILE, "index.dex"); //TODO: change hardcoded index file
-				fileReceiver.enqueueMessage(m);
+				fileReceiver.enqueueMessage(message);
 				if (fileReceiver.isStopped()) {
 					t = new Thread(fileReceiver);
 					t.start();
