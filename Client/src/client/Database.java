@@ -131,7 +131,7 @@ public class Database {
 	    "CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (?,?,?,?,?,?)");
 	    ps.setString(1,null);
 	    ps.setString(2,"FILE");
-	    ps.setString(3,System.getProperty("user.home") + System.getProperty("file.separator") + ".ubiquity" + System.getProperty("file.separator") + filename);
+	    ps.setString(3,System.getProperty("derby.system.home") + System.getProperty("file.separator") + filename);
 	    ps.setString(4,System.getProperty("line.separator"));
 	    ps.setString(5,null);
 	    ps.setString(6,null);

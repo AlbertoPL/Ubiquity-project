@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -53,8 +54,7 @@ public class Client implements Messageable, Runnable {
 	private boolean connected;
 	private boolean loggedIn;
 	private Socket socket, fileSocket;
-	private FileSender fileSender;
-	private FileReceiver fileReceiver;
+	private FileHandler fileHandler;
 	
 	/**
 	 * Starts the indexer and the message handler on separate threads
@@ -73,6 +73,7 @@ public class Client implements Messageable, Runnable {
 		
 		indexer = new Indexer(this);
 		fileMonitor = new FileMonitor(this);
+		fileHandler = new FileHandler(this);
 		database = new Database();
 		loggedIn = false;
 		connected = false;
@@ -109,6 +110,10 @@ public class Client implements Messageable, Runnable {
 			m = new Message(newCode, message.getPayload().substring(message.getPayload().indexOf(" ") + 1));
 			sender.enqueueMessage(m);
 			break;
+		case MessageCode.DEVICE_NOT_SUPPORTED:
+			System.out.println("This device is not supported by the server!");
+			connected = false;
+			break;
 		case MessageCode.SERVER_REQUEST_AUTH:
 			login();
 			//TODO: Handle the case where the algorithm check fails (it shouldn't!)
@@ -126,93 +131,28 @@ public class Client implements Messageable, Runnable {
 			JOptionPane.showMessageDialog(null, "Too many failed attempts to login! Please try again later.", "Account Locked", JOptionPane.ERROR_MESSAGE);
 			break;
 		case MessageCode.INDEX_REQUEST:
-			if (fileSender == null || fileSender.isStopped()) {
-				fileSender = new FileSender(this);
-			}
-			m = new Message(MessageCode.FILE_REQUEST, "index.dex"); //TODO: change hardcoded index file location
-			fileSender.enqueueMessage(m);
-			t = new Thread(fileSender);
-			t.start();
 			break;
 		case MessageCode.FILE_REQUEST:
-			if (fileSender == null || fileSender.isStopped()) {
-				fileSender = new FileSender(this);
-			}
-			fileSender.enqueueMessage(message);
-			t = new Thread(fileSender);
-			t.start();
-			break;
-		case MessageCode.SENDING_INDEX://TODO: USES A NEW SOCKET STREAM, BUT PERHAPS SHOULD USE THE CLIENT'S FILESOCKET?
-			if (fileReceiver == null || fileReceiver.isStopped()) {
-				fileReceiver = new FileReceiver(this);
-			}
-			m = new Message(MessageCode.SENDING_FILE, "index.dex"); //TODO: change hardcoded index file
-			fileReceiver.enqueueMessage(m);
-			t = new Thread(fileReceiver);
-			t.start();
-			break;
-		case MessageCode.SENDING_FILE://TODO: USES A NEW SOCKET STREAM, BUT PERHAPS SHOULD USE THE CLIENT'S FILESOCKET?
-			if (fileReceiver == null || fileReceiver.isStopped()) {
-				fileReceiver = new FileReceiver(this);
-			}
-			fileReceiver.enqueueMessage(message);
-			t = new Thread(fileReceiver);
-			t.start();
 			break;
 		case MessageCode.SERVER_INDEX_REQUEST_ACK:
-			if (fileSocket == null || fileSocket.isClosed()) {
-				try {
-					fileSocket = new Socket(hostname, Integer.parseInt(message.getPayload()));
-				} catch (NumberFormatException e) {
-					e.printStackTrace();
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (fileSocket != null) {
-				if (fileSender == null) {
-					try {
-						fileSender = new FileSender(this, fileSocket.getOutputStream());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				m = new Message(MessageCode.FILE_REQUEST, "index.dex"); //TODO: change hardcoded index file location
-				fileSender.enqueueMessage(m);
-				if (fileSender.isStopped()) {
-					t = new Thread(fileSender);
-					t.start();
-				}
-			}
+			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(0, message.getPayload().indexOf(' '))));
+			m = new Message(MessageCode.SENDING_FILE,message.getPayload().substring(message.getPayload().indexOf(' ') + 1));
+			fileHandler.setFileToSendMetadata(m);
+			t = new Thread(fileHandler);
+			t.start();
 			break;
 		case MessageCode.SERVER_FILE_REQUEST_ACK:
-			if (fileSocket == null || fileSocket.isClosed()) {
-				try {
-					fileSocket = new Socket(hostname, Integer.parseInt(message.getPayload()));
-				} catch (NumberFormatException e) {
-					e.printStackTrace();
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (fileSocket != null) {
-				if (fileSender == null) {
-					try {
-						fileSender = new FileSender(this, fileSocket.getOutputStream());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				fileSender.enqueueMessage(message);
-				if (fileSender.isStopped()) {
-					t = new Thread(fileSender);
-					t.start();
-				}
-			}
+			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(message.getPayload().indexOf(' '))));
+			m = new Message(MessageCode.SENDING_FILE,message.getPayload().substring(message.getPayload().indexOf(' ') + 1));
+			fileHandler.setFileToSendMetadata(m);
+			t = new Thread(fileHandler);
+			t.start();
+			break;
+		case MessageCode.REQUEST_NAME_AND_OS:
+			String os = getOsName();
+			String computername = getDeviceName();
+			m = new Message(MessageCode.NAME_AND_OS, os + ":" + computername);
+			sender.enqueueMessage(m);
 			break;
 		default:
 			System.err.println("INVALID MESSAGE CODE DETECTED: " + message.getCode());
@@ -379,5 +319,27 @@ public class Client implements Messageable, Runnable {
 	
 	public Database getDatabase() {
 		return database;
+	}
+
+	@Override
+	public String getDeviceName() {
+		String name = "";
+		try {
+			name = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return name;
+	}
+
+	@Override
+	public String getOsName() {
+		return System.getProperty("os.name");
+	}
+	
+	//on the client, there is no root folder
+	@Override
+	public String getRootFolder() {
+		return null;
 	}
 }

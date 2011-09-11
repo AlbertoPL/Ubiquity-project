@@ -40,4 +40,10 @@ public interface Messageable {
 	public boolean isLoggedIn();
 	
 	public void receiverDisconnected();
+	
+	public String getDeviceName();
+	
+	public String getOsName();
+	
+	public String getRootFolder();
 }

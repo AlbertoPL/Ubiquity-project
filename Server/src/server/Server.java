@@ -2,19 +2,14 @@ package server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
-import message.Message;
-import message.MessageCode;
-import message.MessageReceiver;
-import message.MessageSender;
-import message.Messageable;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
 
 /**
  * 
@@ -35,15 +30,19 @@ public class Server implements Runnable {
 	private List<ClientHandler> clientHandlers;
 	private ServerSocket serverSocket;
 	private FileServer fileServer;
+	public static List<?> validOsTypes;
 	
 	public Server() {
-		Properties properties = new Properties();
+		PropertiesConfiguration properties = new PropertiesConfiguration();
 		try {
 		    properties.load(new FileInputStream (SERVER_PROPERTIES));
+			port = properties.getInt("port");
+			validOsTypes = properties.getList("validOs");
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
 		}
-		port = Integer.parseInt(properties.getProperty("port"));
 		running = true;
 		clientHandlers = new ArrayList<ClientHandler>();
 		
@@ -58,18 +57,13 @@ public class Server implements Runnable {
 	@Override
 	public void run() {
 		
-		//start the file server so we can begin listening for clients trying to send files
-		fileServer = new FileServer(this);
-		Thread t = new Thread(fileServer);
-		t.start();
-		
 		Socket clientSocket = null;
 		while (running) {
 			try {
 			    clientSocket = serverSocket.accept(); 
 			    
 			    ClientHandler client = new ClientHandler(clientSocket);
-			    t = new Thread(client);
+			    Thread t = new Thread(client);
 			    t.start();
 			    
 			    clientHandlers.add(client);

@@ -77,8 +77,8 @@ public class MessageSender implements Runnable {
 						connected = false;
 					}
 				}
-				//ok to send if we're asking for authentication
-				else if (m != null && (m.getCode() == MessageCode.SERVER_REQUEST_AUTH || m.getCode() == MessageCode.CLIENT_SEND_AUTH || m.getCode() == MessageCode.SERVER_ACCEPT_AUTH || m.getCode() == MessageCode.SERVER_REJECT_AUTH || m.getCode() == MessageCode.SERVER_BLOCK_AUTH)) {
+				//ok to send if we're asking for authentication or sending name and os, should move list elsewhere.
+				else if (m != null && (m.getCode() == MessageCode.SERVER_REQUEST_AUTH || m.getCode() == MessageCode.CLIENT_SEND_AUTH || m.getCode() == MessageCode.SERVER_ACCEPT_AUTH || m.getCode() == MessageCode.SERVER_REJECT_AUTH || m.getCode() == MessageCode.SERVER_BLOCK_AUTH || m.getCode() == MessageCode.REQUEST_NAME_AND_OS || m.getCode() == MessageCode.NAME_AND_OS || m.getCode() == MessageCode.DEVICE_NOT_SUPPORTED || m.getCode() == MessageCode.NOT_LOGGED_IN)) {
 					try {
 						System.out.println("Sending message: " + m.getCode());
 						out.writeObject(m);

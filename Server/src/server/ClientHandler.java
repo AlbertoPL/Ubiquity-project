@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import file.FileReceiver;
-
 import message.Message;
 import message.MessageCode;
 import message.MessageReceiver;
 import message.MessageSender;
 import message.Messageable;
+import file.FileReceiver;
+import file.FileSender;
 
 public class ClientHandler implements Messageable, Runnable {
 
@@ -20,15 +20,23 @@ public class ClientHandler implements Messageable, Runnable {
 	private boolean loggedIn;
 	private MessageSender sender;
 	private MessageReceiver receiver;
-	private FileReceiver fileReceiver;
+	
+	private FileServer fileServer;
+	
 	private Socket socket, fileSocket;
 	private int loginTries;
+	
+	private String deviceName;
+	private String osType;
+	
+	private String username = "Crowtche"; //hardcoded for now
 	
 	private final static int MAX_LOGIN_TRIES = 3;
 	
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
 		loginTries = 0;
+		fileServer = new FileServer(this);
 	}
 	
 	@Override
@@ -51,11 +59,11 @@ public class ClientHandler implements Messageable, Runnable {
 			if (code == MessageCode.CLIENT_SEND_AUTH) {
 				String payload = message.getPayload();
 				//hardcoded for now
-				if ("Crowtche".equals(payload.substring(0, payload.indexOf(" "))) 
+				if (username.equals(payload.substring(0, payload.indexOf(" "))) 
 						&& "6147273FFC253ABF34954F15203A1E47D9854BEC".equals(payload.
 								substring(payload.indexOf(" ")+ 1))) {
-					m = new Message(MessageCode.SERVER_ACCEPT_AUTH, null);
-					loggedIn = true;
+					m = new Message(MessageCode.REQUEST_NAME_AND_OS, null);
+					//loggedIn = true;
 				}
 				else {
 					loginTries++;
@@ -68,40 +76,47 @@ public class ClientHandler implements Messageable, Runnable {
 				}
 				sender.enqueueMessage(m);
 			}
+			else if (code == MessageCode.NAME_AND_OS) {
+				String payload = message.getPayload();
+				
+				String os = payload.substring(0, payload.indexOf(':')).trim();
+				String name = payload.substring(payload.indexOf(':') + 1).trim();
+				
+				if (Server.validOsTypes.contains(os)) {
+					deviceName = name;
+					osType = os;
+					loggedIn = true;
+					sender.enqueueMessage(new Message(MessageCode.SERVER_ACCEPT_AUTH, null));
+				}
+				else {
+					for (Object s: Server.validOsTypes) {
+						System.out.println(s.toString());
+					}
+					System.err.println(os);
+					payload = message.getCode() + " " + message.getPayload();
+					m = new Message(MessageCode.DEVICE_NOT_SUPPORTED, payload);
+					sender.enqueueMessage(m);
+				}
+			}
 			else {
 				String payload = message.getCode() + " " + message.getPayload();
 				m = new Message(MessageCode.NOT_LOGGED_IN, payload);
+				sender.enqueueMessage(m);
 			}
 		}
 		else {
 			switch(code) {
 			case MessageCode.INDEX_REQUEST:
-				m = new Message(MessageCode.SERVER_INDEX_REQUEST_ACK, String.valueOf(FileServer.PORT));
+				t = new Thread(fileServer);
+				t.start();
+				m = new Message(MessageCode.SERVER_INDEX_REQUEST_ACK, String.valueOf(fileServer.getPort()) + " " + message.getPayload());
 				sender.enqueueMessage(m);
 				break;
 			case MessageCode.FILE_REQUEST:
-				m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, String.valueOf(FileServer.PORT));
+				t = new Thread(fileServer);
+				t.start();
+				m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, String.valueOf(fileServer.getPort()) + " " + message.getPayload());
 				sender.enqueueMessage(m);
-				break;
-			case MessageCode.SENDING_INDEX:
-				if (fileReceiver == null) {
-					fileReceiver = new FileReceiver(this);
-				}
-				fileReceiver.enqueueMessage(message);
-				if (fileReceiver.isStopped()) {
-					t = new Thread(fileReceiver);
-					t.start();
-				}
-				break;
-			case MessageCode.SENDING_FILE:
-				if (fileReceiver == null) {
-					fileReceiver = new FileReceiver(this);
-				}
-				fileReceiver.enqueueMessage(message);
-				if (fileReceiver.isStopped()) {
-					t = new Thread(fileReceiver);
-					t.start();
-				}
 				break;
 			}
 		}
@@ -209,6 +224,21 @@ public class ClientHandler implements Messageable, Runnable {
 	@Override
 	public boolean isLoggedIn() {
 		return loggedIn;
+	}
+
+	@Override
+	public String getDeviceName() {
+		return deviceName;
+	}
+
+	@Override
+	public String getOsName() {
+		return osType;
+	}
+	
+	@Override
+	public String getRootFolder() {
+		return username + System.getProperty("file.separator") + deviceName + System.getProperty("file.separator");
 	}
 
 }

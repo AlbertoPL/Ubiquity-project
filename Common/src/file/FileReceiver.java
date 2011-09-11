@@ -2,9 +2,11 @@ package file;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -16,39 +18,21 @@ import message.Messageable;
 public class FileReceiver implements Runnable {
 
 	private boolean running;
-	private boolean connected;
-	private Socket socket;
-	private int filePort = 4442; //must be changed to a property later
 	private final static int BUFFER = 2048;
-	
-	private Messageable master;
 	
 	private List<Message> fileMessageQueue;
 	private DataInputStream in;
 	
-	private final static int TIMEOUT_TIMER_MS = 3000;
+	private String rootFolder = "";
 	
-	public FileReceiver(Messageable c) {
-		master = c;
+	public FileReceiver(String rootFolder) {
+		this.rootFolder = rootFolder;
 		fileMessageQueue = new ArrayList<Message>();
 		running = false;
-		connected = false;
-		
 	}
 	
-	private boolean connect() {
-		try {
-			socket = new Socket(master.getHost(), filePort);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (socket != null) {			
-			connected = true;
-			return true;
-		}
-		return false;
+	public void setDataInputStream(DataInputStream in) {
+		this.in = in;
 	}
 	
 	public void enqueueMessage(Message m) {
@@ -65,11 +49,6 @@ public class FileReceiver implements Runnable {
 	
 	public void stop() {
 		running = false;
-		try {
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	public boolean isStopped() {
@@ -79,21 +58,19 @@ public class FileReceiver implements Runnable {
 	@Override
 	public void run() {
 		running = true;
-		int connectTries = 0;
-		while (!connect() && connectTries < 3) {
-			connectTries++;
-		}
-		try {
-			in = new DataInputStream(socket.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		while (connected && !fileMessageQueue.isEmpty() && in != null) {
-			Message m = dequeueMessage();
+
+		if (running && in != null) {
 			byte[] mybytearray = new byte[BUFFER];
 			try {
-				File f = new File(m.getPayload());
+				int fileNameSize = in.readInt();
+				StringBuilder filenamebuilder = new StringBuilder();
+				for (int x = 0; x < fileNameSize; ++x) {
+					filenamebuilder.append(in.readChar());
+				}
+				String filename = filenamebuilder.toString();
+				File f = new File(rootFolder + filename);
 				String localName = f.getName();
+				System.out.println("Receiving: " + localName);
 				FileOutputStream fos = new FileOutputStream(localName,
 						false);
 				BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -114,8 +91,9 @@ public class FileReceiver implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			//put database stuff in a separate thread and continue
+		}
+		else {
+			System.err.println("Receiver does not have an input stream!");
 		}
 		stop();
 	}

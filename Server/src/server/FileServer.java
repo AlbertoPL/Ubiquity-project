@@ -1,11 +1,12 @@
 package server;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import message.Messageable;
-
+import file.FileReceiver;
 import file.FileSender;
 
 /**
@@ -19,44 +20,59 @@ import file.FileSender;
  */
 public class FileServer implements Runnable {
 
-	public static final int PORT = 4442;
-	
-	private boolean running;
 	private ServerSocket fileSocket;
-	private Server server;
+	private FileSender fileSender;
+	private FileReceiver fileReceiver;
 
-	public FileServer(Server server) {
-		running = false;
-		this.server = server;
-		try {
-		    fileSocket = new ServerSocket(PORT);
-		    
-		} catch (IOException e) {
-		    System.out.println("Could not listen on port: " + PORT);
-		}
+	public FileServer(ClientHandler handler) {
+		fileSender = new FileSender(handler.getRootFolder());		
+	    fileReceiver = new FileReceiver(handler.getRootFolder());
+		
+	    boolean success = false;
+	    while (!success) {
+		    try {
+			    fileSocket = new ServerSocket(0);
+			    success = true;
+			} catch (IOException e) {
+			    System.err.println("Could not listen on the port chosen: " + fileSocket.getLocalPort());
+			}
+	    }
 	}
 	
-	public void stop() {
-		running = false;
+	public int getPort() {
+		return fileSocket.getLocalPort();
 	}
 
 	@Override
 	public void run() {
-		running = true;
 		Socket clientSocket = null;
-		while (running) {
+		try {
+		    clientSocket = fileSocket.accept(); 
+		    
+		    fileSender.setDataOutputStream(new DataOutputStream(clientSocket.getOutputStream()));
+		    Thread t = new Thread(fileSender);
+		    t.start();
+			    
+		    fileReceiver.setDataInputStream(new DataInputStream(clientSocket.getInputStream()));
+		    t = new Thread(fileReceiver);
+		    t.start();
+		} catch (IOException e) {
+		    System.out.println("Accept failed: " + fileSocket.getLocalPort());
+		}
+		
+		do {
 			try {
-			    clientSocket = fileSocket.accept(); 
-			    FileSender cfs = new FileSender(null, clientSocket.getOutputStream());
-			    Thread t = new Thread(cfs);
-			    t.start();
-			} catch (IOException e) {
-			    System.out.println("Accept failed: " + PORT);
+				Thread.sleep(5000); //keep waiting while either is still going
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+		while (!fileSender.isStopped() || !fileReceiver.isStopped());
 		try {
-			fileSocket.close();
+			System.err.println("Closing socket...");
+			clientSocket.close();
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
