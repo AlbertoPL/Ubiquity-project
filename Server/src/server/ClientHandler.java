@@ -1,5 +1,6 @@
 package server;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,8 +11,6 @@ import message.MessageCode;
 import message.MessageReceiver;
 import message.MessageSender;
 import message.Messageable;
-import file.FileReceiver;
-import file.FileSender;
 
 public class ClientHandler implements Messageable, Runnable {
 
@@ -36,7 +35,6 @@ public class ClientHandler implements Messageable, Runnable {
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
 		loginTries = 0;
-		fileServer = new FileServer(this);
 	}
 	
 	@Override
@@ -78,14 +76,14 @@ public class ClientHandler implements Messageable, Runnable {
 			}
 			else if (code == MessageCode.NAME_AND_OS) {
 				String payload = message.getPayload();
-				
 				String os = payload.substring(0, payload.indexOf(':')).trim();
 				String name = payload.substring(payload.indexOf(':') + 1).trim();
-				
+				System.out.println("NAME: " + name);
 				if (Server.validOsTypes.contains(os)) {
 					deviceName = name;
 					osType = os;
 					loggedIn = true;
+					fileServer = new FileServer(this);
 					sender.enqueueMessage(new Message(MessageCode.SERVER_ACCEPT_AUTH, null));
 				}
 				else {

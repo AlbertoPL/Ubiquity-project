@@ -68,8 +68,13 @@ public class FileReceiver implements Runnable {
 					filenamebuilder.append(in.readChar());
 				}
 				String filename = filenamebuilder.toString();
-				File f = new File(rootFolder + filename);
-				String localName = f.getName();
+				//make the directories if they do not exist
+				File f = new File(rootFolder);
+				if (!f.exists()) {
+					f.mkdirs();
+				}
+				f = new File(rootFolder + filename);
+				String localName = f.getAbsolutePath();
 				System.out.println("Receiving: " + localName);
 				FileOutputStream fos = new FileOutputStream(localName,
 						false);
