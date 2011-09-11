@@ -1,7 +1,6 @@
 package message;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 public class MessageSender implements Runnable {
 
 	private boolean running;
-	private boolean connected;
 	
 	private Messageable master;
 	
@@ -23,7 +21,6 @@ public class MessageSender implements Runnable {
 		master = c;
 		messageQueue = new ArrayList<Message>();
 		running = false;
-		connected = false;
 		if (out == null) {
 			try {
 				out = new ObjectOutputStream(master.getOutputStream());
@@ -44,7 +41,6 @@ public class MessageSender implements Runnable {
 		master = c;
 		messageQueue = new ArrayList<Message>();
 		running = false;
-		connected = false;
 	}
 	
 	public void enqueueMessage(Message m) {
@@ -74,7 +70,6 @@ public class MessageSender implements Runnable {
 						out.writeObject(m);
 					} catch (IOException e) {
 						e.printStackTrace();
-						connected = false;
 					}
 				}
 				//ok to send if we're asking for authentication or sending name and os, should move list elsewhere.
@@ -84,7 +79,6 @@ public class MessageSender implements Runnable {
 						out.writeObject(m);
 					} catch (IOException e) {
 						e.printStackTrace();
-						connected = false;
 					}
 				}
 				else if (m != null && !master.isLoggedIn()) {

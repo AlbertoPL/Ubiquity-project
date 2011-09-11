@@ -3,7 +3,6 @@ package message;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +85,7 @@ public class MessageReceiver implements Runnable {
 				}
 			}
 			try {
-				Thread.sleep(1000 * 3);
+				Thread.sleep(TIMEOUT_TIMER_MS);
 			}
 			catch(InterruptedException e) {
 				e.printStackTrace();

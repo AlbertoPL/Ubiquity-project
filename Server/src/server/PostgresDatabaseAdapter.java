@@ -70,7 +70,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 	
 	
 	@Override
-	public void storeIndexInDatabase(final String username, final String filename, final String computerName) {
+	public void storeIndexInDatabase(final String username, final String filename, final String deviceName) {
 		Thread t = new Thread(new Runnable() {
 
 			@Override
@@ -129,7 +129,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 									conn.commit();
 									if (!rs.next()) {
 										insertIndexFiles.setString(1, nameOfFile);
-										insertIndexFiles.setString(2, computerName.toString());
+										insertIndexFiles.setString(2, deviceName);
 										insertIndexFiles.setString(3, firstPath);
 										insertIndexFiles.setString(4, username);
 										insertIndexFiles.executeUpdate();
@@ -158,7 +158,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 										conn.commit();
 										if (!rs.next()) {
 											insertIndexFiles.setString(1, nameOfFile);
-											insertIndexFiles.setString(2, computerName.toString());
+											insertIndexFiles.setString(2, deviceName);
 								        	insertIndexFiles.setString(3, splitter[x]);
 								        	insertIndexFiles.setString(4, username);
 								        	insertIndexFiles.executeUpdate();

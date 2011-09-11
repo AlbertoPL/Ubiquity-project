@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6621680135548538902L;
 	private int code;
 	private String payload;
 	private String protocol;

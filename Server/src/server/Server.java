@@ -29,7 +29,6 @@ public class Server implements Runnable {
 	private boolean running;
 	private List<ClientHandler> clientHandlers;
 	private ServerSocket serverSocket;
-	private FileServer fileServer;
 	public static List<?> validOsTypes;
 	
 	public Server() {

@@ -21,8 +21,6 @@ import message.MessageReceiver;
 import message.MessageSender;
 import message.Messageable;
 import util.BaseConversion;
-import file.FileReceiver;
-import file.FileSender;
 
 /**
  * 

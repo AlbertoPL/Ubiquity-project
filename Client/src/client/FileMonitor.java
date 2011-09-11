@@ -7,10 +7,8 @@ import net.contentobjects.jnotify.JNotifyListener;
 public class FileMonitor implements Runnable {
 
 	private int watchID;
-	private Client client;
 	
 	public FileMonitor(Client c) {
-		client = c;
 	}
 	
 	@Override
