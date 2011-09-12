@@ -27,7 +27,7 @@ public class FileHandler implements Runnable {
 	
 	public FileHandler(Client client) {
 		fileSender = new FileSender(client.getRootFolder());		
-	    fileReceiver = new FileReceiver(client.getRootFolder());
+	    fileReceiver = new FileReceiver(client, client.getRootFolder());
 	    hostname = client.getHost();
 	}
 	

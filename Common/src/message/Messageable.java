@@ -46,4 +46,6 @@ public interface Messageable {
 	public String getOsName();
 	
 	public String getRootFolder();
+	
+	public void fileReceivedCallback(String file, Message m);
 }

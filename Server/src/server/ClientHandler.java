@@ -27,13 +27,16 @@ public class ClientHandler implements Messageable, Runnable {
 	private String deviceName;
 	private String osType;
 	
-	private String username = "Crowtche"; //hardcoded for now
+	private String username; //hardcoded for now
+	
+	private DatabaseAdapter database;
 	
 	private final static int MAX_LOGIN_TRIES = 3;
 	
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
 		loginTries = 0;
+		database = new PostgresDatabaseAdapter();
 	}
 	
 	@Override
@@ -55,12 +58,10 @@ public class ClientHandler implements Messageable, Runnable {
 		if (!loggedIn) {
 			if (code == MessageCode.CLIENT_SEND_AUTH) {
 				String payload = message.getPayload();
-				//hardcoded for now
-				if (username.equals(payload.substring(0, payload.indexOf(" "))) 
-						&& "6147273FFC253ABF34954F15203A1E47D9854BEC".equals(payload.
+				if (database.login(payload.substring(0, payload.indexOf(" ")), payload.
 								substring(payload.indexOf(" ")+ 1))) {
 					m = new Message(MessageCode.REQUEST_NAME_AND_OS, null);
-					//loggedIn = true;
+					username = payload.substring(0, payload.indexOf(" "));
 				}
 				else {
 					loginTries++;
@@ -236,6 +237,23 @@ public class ClientHandler implements Messageable, Runnable {
 	@Override
 	public String getRootFolder() {
 		return username + System.getProperty("file.separator") + deviceName + System.getProperty("file.separator");
+	}
+
+	@Override
+	public void fileReceivedCallback(String file, Message m) {
+		// TODO: Determine if this is an index file, if so, update the database
+		//Otherwise, do whatever is necessary with the file such as sending it
+		//to another datastore
+		switch (m.getCode()) {
+		case MessageCode.INDEX:
+			database.storeIndexInDatabase(username, file, deviceName);
+			break;
+		case MessageCode.CACHE:
+			break;
+		case MessageCode.BACKUP:
+			break;
+		}
+		
 	}
 
 }

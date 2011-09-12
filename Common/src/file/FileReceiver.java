@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import message.Message;
+import message.MessageCode;
+import message.Messageable;
 
 public class FileReceiver implements Runnable {
 
@@ -20,7 +22,10 @@ public class FileReceiver implements Runnable {
 	
 	private String rootFolder = "";
 	
-	public FileReceiver(String rootFolder) {
+	private Messageable master;
+	
+	public FileReceiver(Messageable master, String rootFolder) {
+		this.master = master;
 		this.rootFolder = rootFolder;
 		fileMessageQueue = new ArrayList<Message>();
 		running = false;
@@ -80,6 +85,12 @@ public class FileReceiver implements Runnable {
 					bos.flush();
 				}
 				bos.close();
+				if (localName.endsWith(".dex")) { //TODO: VERY naive, make better
+					master.fileReceivedCallback(localName, new Message(MessageCode.INDEX, null));
+				}
+				else {
+					master.fileReceivedCallback(localName, new Message(MessageCode.CACHE, null));
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

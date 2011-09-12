@@ -25,4 +25,9 @@ public class MessageCode {
 	public static final int NAME_AND_OS = 13; //client sends name and OS
 	
 	public static final int DEVICE_NOT_SUPPORTED = 14;
+	
+	//callback messages from a received file
+	public static final int INDEX = 15;
+	public static final int CACHE = 16;
+	public static final int BACKUP = 17;
 }

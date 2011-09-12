@@ -340,4 +340,10 @@ public class Client implements Messageable, Runnable {
 	public String getRootFolder() {
 		return null;
 	}
+
+	@Override
+	public void fileReceivedCallback(String file, Message m) {
+		System.out.println("File received: " + file);
+		//TODO: Potentially other actions like talk to a GUI or make a native call
+	}
 }

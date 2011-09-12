@@ -27,12 +27,12 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 		props.setProperty("password","bob");
 				
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
+			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
 				
-		String loginString = "SELECT name FROM user WHERE password = ?";
+		String loginString = "SELECT \"name\" FROM \"user\" WHERE \"name\" = ? AND \"password\" = ?";
 				
 		if (conn != null) {
 			try {
@@ -43,7 +43,8 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 			}
 				
 			try {
-				login.setString(1, passwordHash);
+				login.setString(1, username);
+				login.setString(2, passwordHash);
 				ResultSet rs = login.executeQuery();
 				conn.commit();
 				if (rs.next()) {
@@ -86,12 +87,12 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 				props.setProperty("user","postgres");
 				props.setProperty("password","bob");
 				try {
-					conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
+					conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 				
-				String insertString = "INSERT INTO file(\"name\", device, path, \"user\") values(?,?,?,?)";
+				String insertString = "INSERT INTO file(\"name\", device, path, \"user\", \"type\") values(?,?,?,?,?)";
 				String checkString = "SELECT path FROM file WHERE path = ?"; 
 				
 				
@@ -115,10 +116,13 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 						String line = "";
 						try {
 							while ((line = read.readLine()) != null) {
-								String splitter[] = line.split(";; ");
-								String deviceName = splitter[0];
-								String nameOfFile = splitter[1];
-								String firstPath = splitter[2];
+								line = read.readLine();
+								String nameOfFile = line.substring(1, line.length() - 1);
+								line = read.readLine();
+								String firstPath = line.substring(1, line.length() - 1);
+								line = read.readLine();
+								String fileType = line.substring(1, line.length() - 1);
+								read.readLine();
 								firstPath = firstPath.replace("\\", "\\\\");
 								
 								//first check to see if the path already exists in the database
@@ -132,6 +136,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 										insertIndexFiles.setString(2, deviceName);
 										insertIndexFiles.setString(3, firstPath);
 										insertIndexFiles.setString(4, username);
+										insertIndexFiles.setString(5, fileType);
 										insertIndexFiles.executeUpdate();
 										conn.commit();
 									}
@@ -146,36 +151,6 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 										excep.printStackTrace();
 								    }
 								}
-							
-							    //in case there are multiple paths
-							    for (int x = 3; x < splitter.length; ++x) {
-							    	//first check to see if the path already exists in the database
-									splitter[x] = splitter[x].replace("\\", "\\\\");
-									
-									try {
-										checkIndex.setString(1, splitter[x]);
-										ResultSet rs = checkIndex.executeQuery();
-										conn.commit();
-										if (!rs.next()) {
-											insertIndexFiles.setString(1, nameOfFile);
-											insertIndexFiles.setString(2, deviceName);
-								        	insertIndexFiles.setString(3, splitter[x]);
-								        	insertIndexFiles.setString(4, username);
-								        	insertIndexFiles.executeUpdate();
-									        conn.commit();
-										}
-									} catch (SQLException e1) {
-									//	System.out.println(splitter[x]);
-									//	e1.printStackTrace();
-										try {
-											System.err.println("Transaction is being rolled back: check splitter[" + x + "]");
-											conn.rollback();
-										} 
-										catch(SQLException excep) {
-											excep.printStackTrace();
-									    }
-									}
-							    }
 							}
 						} catch (IOException e) {
 							e.printStackTrace();
