@@ -5,14 +5,10 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 import message.Message;
-import message.Messageable;
 
 public class FileSender implements Runnable {
 
@@ -22,10 +18,7 @@ public class FileSender implements Runnable {
 	private List<Message> fileMessageQueue;
 	private DataOutputStream out;
 	
-	private String rootFolder = "";
-		
 	public FileSender(String rootFolder) {
-		this.rootFolder = rootFolder;
 		fileMessageQueue = new ArrayList<Message>();
 		running = false;
 	}

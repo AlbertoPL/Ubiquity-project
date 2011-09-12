@@ -2,18 +2,13 @@ package file;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import message.Message;
-import message.Messageable;
 
 public class FileReceiver implements Runnable {
 
@@ -37,14 +32,6 @@ public class FileReceiver implements Runnable {
 	
 	public void enqueueMessage(Message m) {
 		fileMessageQueue.add(m);
-	}
-	
-	private Message dequeueMessage() {
-		if (fileMessageQueue.isEmpty()) {
-			running = false;
-			return null;
-		}
-		return fileMessageQueue.remove(0);
 	}
 	
 	public void stop() {
