@@ -9,10 +9,19 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class PostgresDatabaseAdapter implements DatabaseAdapter {
 
+	Properties props = new Properties();
+	
+	public PostgresDatabaseAdapter() {
+		props.setProperty("user","postgres");
+		props.setProperty("password","bob");
+	}
+	
 	@Override
 	public boolean login(final String username, final String passwordHash) {
 
@@ -21,10 +30,6 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 				
 		Connection conn = null;
 		PreparedStatement login = null;
-		
-		Properties props = new Properties();
-		props.setProperty("user","postgres");
-		props.setProperty("password","bob");
 				
 		try {
 			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
@@ -83,9 +88,6 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 			    PreparedStatement insertIndexFiles = null;
 			    PreparedStatement checkIndex = null;
 			    
-				Properties props = new Properties();
-				props.setProperty("user","postgres");
-				props.setProperty("password","bob");
 				try {
 					conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
 				} catch (SQLException e1) {
@@ -181,6 +183,63 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 			
 		});
 		t.start();
+	}
+	
+	@Override
+	public List<Object[]> selectAllFilesFromUser(String username) {
+		List<Object[]> objects = new ArrayList<Object[]>();
+		Connection conn = null;
+	    PreparedStatement getIndex = null;
+	    
+		try {
+			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		String getString = "SELECT * FROM file WHERE \"user\" = ?"; 
+		
+		if (conn != null) {
+			try {
+				getIndex = conn.prepareStatement(getString);
+				conn.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				getIndex.setString(1, username);
+				ResultSet rs = getIndex.executeQuery();
+				conn.commit();
+				while (rs.next()) {
+					String path = rs.getString("path");
+					path = path.replace("\\\\", "\\");
+					path = path.trim();
+					objects.add(new Object[] {
+							rs.getString("device"), rs.getString("name").trim(), path, rs.getString("type").trim()}); 
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				try {
+					System.err.println("Transaction is being rolled back: check firstPath");
+					conn.rollback();
+				} 
+				catch(SQLException excep) {
+					excep.printStackTrace();
+			    }
+			}
+		}
+		try {
+			if (getIndex != null) { 
+				getIndex.close(); 
+			}
+		    if (conn != null) {
+		    	conn.close();
+		    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return objects;
 	}
 
 }

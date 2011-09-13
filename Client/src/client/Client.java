@@ -77,6 +77,15 @@ public class Client implements Messageable, Runnable {
 		connected = false;
 	}
 	
+	//Web client version
+	public Client(String host, int port) {
+		this.port = port;
+		hostname = host;
+		loggedIn = false;
+		connected = false;
+		connect();
+	}
+	
 	public int getPort() {
 		return port;
 	}
@@ -226,19 +235,23 @@ public class Client implements Messageable, Runnable {
 		running = true;
 		
 		//start indexer TODO: set indexer to be run periodically
-		Thread t = new Thread(indexer);
-		if (!t.isAlive()) {
-			t = new Thread(indexer);//initialized twice at first, I know.
-			t.start();
-			t.setPriority(Thread.MIN_PRIORITY);
+		if (indexer != null) {
+			Thread t = new Thread(indexer);
+			if (!t.isAlive()) {
+				t = new Thread(indexer);//initialized twice at first, I know.
+				t.start();
+				t.setPriority(Thread.MIN_PRIORITY);
+			}
 		}
 		
 		//start file monitor TODO: find out how JNotify breaks when it does
-		Thread tt = new Thread(fileMonitor);
-		if (!tt.isAlive()) {
-			tt = new Thread(fileMonitor);
-			tt.start();
-			tt.setPriority(Thread.MAX_PRIORITY);
+		if (fileMonitor != null) {
+			Thread tt = new Thread(fileMonitor);
+			if (!tt.isAlive()) {
+				tt = new Thread(fileMonitor);
+				tt.start();
+				tt.setPriority(Thread.MAX_PRIORITY);
+			}
 		}
 		
 		while (running) {

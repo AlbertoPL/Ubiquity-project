@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.List;
 
 import message.Message;
 import message.MessageCode;
@@ -27,7 +28,7 @@ public class ClientHandler implements Messageable, Runnable {
 	private String deviceName;
 	private String osType;
 	
-	private String username; //hardcoded for now
+	private String username;
 	
 	private DatabaseAdapter database;
 	
@@ -58,10 +59,9 @@ public class ClientHandler implements Messageable, Runnable {
 		if (!loggedIn) {
 			if (code == MessageCode.CLIENT_SEND_AUTH) {
 				String payload = message.getPayload();
-				if (database.login(payload.substring(0, payload.indexOf(" ")), payload.
-								substring(payload.indexOf(" ")+ 1))) {
+				if (login(payload)) {
 					m = new Message(MessageCode.REQUEST_NAME_AND_OS, null);
-					username = payload.substring(0, payload.indexOf(" "));
+					setUsername(payload.substring(0, payload.indexOf(" ")));
 				}
 				else {
 					loginTries++;
@@ -254,6 +254,19 @@ public class ClientHandler implements Messageable, Runnable {
 			break;
 		}
 		
+	}
+	
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	public List<Object[]> getAllUserFiles() {
+		return database.selectAllFilesFromUser(username);
+	}
+	
+	public boolean login(String payload) {
+		return database.login(payload.substring(0, payload.indexOf(" ")), payload.
+				substring(payload.indexOf(" ")+ 1));
 	}
 
 }
