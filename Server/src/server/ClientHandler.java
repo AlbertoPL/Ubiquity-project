@@ -260,6 +260,10 @@ public class ClientHandler implements Messageable, Runnable {
 		this.username = username;
 	}
 	
+	public boolean userExists(String username) {
+		return database.userExists(username);
+	}
+	
 	public List<Object[]> getAllUserFiles() {
 		return database.selectAllFilesFromUser(username);
 	}
@@ -267,6 +271,10 @@ public class ClientHandler implements Messageable, Runnable {
 	public boolean login(String payload) {
 		return database.login(payload.substring(0, payload.indexOf(" ")), payload.
 				substring(payload.indexOf(" ")+ 1));
+	}
+	
+	public boolean betaSignup(String username, String email) {
+		return database.betaSignup(username, email);
 	}
 
 }

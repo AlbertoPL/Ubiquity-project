@@ -14,4 +14,6 @@ public interface DatabaseAdapter {
 	public void storeIndexInDatabase(final String username, final String filename, final String deviceName);
 	public boolean login(final String username, final String passwordHash);
 	public List<Object[]> selectAllFilesFromUser(String username);
+	public boolean userExists(String username);
+	public boolean betaSignup(String username, String email);
 }

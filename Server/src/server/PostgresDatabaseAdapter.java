@@ -242,4 +242,133 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 		return objects;
 	}
 
+	@Override
+	public boolean userExists(String username) {
+		boolean exists = false;
+		Connection conn = null;
+	    PreparedStatement getUser = null;
+	    
+		try {
+			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		String getString = "SELECT * FROM \"user\" WHERE \"name\" = ?"; 
+		String getBetaString = "SELECT * FROM betasignup WHERE username = ?";
+		
+		if (conn != null) {
+			try {
+				getUser = conn.prepareStatement(getString);
+				conn.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				getUser.setString(1, username);
+				ResultSet rs = getUser.executeQuery();
+				conn.commit();
+				if (rs.next()) {
+					exists = true;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				try {
+					System.err.println("Transaction is being rolled back: check username");
+					conn.rollback();
+				} 
+				catch(SQLException excep) {
+					excep.printStackTrace();
+			    }
+			}
+			try {
+				getUser = conn.prepareStatement(getBetaString);
+				conn.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				getUser.setString(1, username);
+				ResultSet rs = getUser.executeQuery();
+				conn.commit();
+				if (rs.next()) {
+					exists = true;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				try {
+					System.err.println("Transaction is being rolled back: check username");
+					conn.rollback();
+				} 
+				catch(SQLException excep) {
+					excep.printStackTrace();
+			    }
+			}
+			
+		}
+		try {
+			if (getUser != null) { 
+				getUser.close(); 
+			}
+		    if (conn != null) {
+		    	conn.close();
+		    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return exists;
+	}
+
+	@Override
+	public boolean betaSignup(String username, String email) {
+		boolean success = false;
+		Connection conn = null;
+	    PreparedStatement insertString = null;
+	    
+		try {
+			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		String getString = "INSERT INTO betasignup (username, email) values(?,?)"; 
+		
+		if (conn != null) {
+			try {
+				insertString = conn.prepareStatement(getString);
+				conn.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				insertString.setString(1, username);
+				insertString.setString(2, email);
+				insertString.executeUpdate();
+				conn.commit();
+				success = true;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				try {
+					System.err.println("Transaction is being rolled back: check username or email");
+					conn.rollback();
+				} 
+				catch(SQLException excep) {
+					excep.printStackTrace();
+			    }
+			}
+		}
+		try {
+			if (insertString != null) { 
+				insertString.close(); 
+			}
+		    if (conn != null) {
+		    	conn.close();
+		    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return success;
+	}
+
 }

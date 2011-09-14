@@ -7,10 +7,16 @@ import java.util.List;
 import server.ClientHandler;
 import util.BaseConversion;
 
+import com.ubiquity.webubiquity.form.NewAccountPojoForm;
 import com.ubiquity.webubiquity.window.ListWindow;
 import com.vaadin.Application;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.LoginForm.LoginEvent;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.BaseTheme;
 
 public class WebUbiquityApplication extends Application {
 	/**
@@ -21,12 +27,16 @@ public class WebUbiquityApplication extends Application {
 	private boolean loggedIn;
 	private ListWindow mainWindow;
 	private LoginForm login;
+	private ClientHandler client;
+	private NewAccountPojoForm newAccountForm;
 	
 	@Override
 	public void init() {
 		mainWindow = new ListWindow("Web Ubiquity Application");
 		setMainWindow(mainWindow);
 
+		client = new ClientHandler(null);
+		
 		loggedIn = false;
 		//ask for login first!
 		showLoginForm();
@@ -36,8 +46,12 @@ public class WebUbiquityApplication extends Application {
 		mainWindow.setContent();
 	}
 	
-	private void populateTable(ClientHandler c) {
-		List<Object[]> files = c.getAllUserFiles();
+	public boolean userExists(String username) {
+		return client.userExists(username);
+	}
+	
+	private void populateTable() {
+		List<Object[]> files = client.getAllUserFiles();
 		
 		int count = 0;
 		if (files != null) {
@@ -47,8 +61,28 @@ public class WebUbiquityApplication extends Application {
 		}	
 	}
 	
+	public boolean betaSignup(String username, String email) {
+		return client.betaSignup(username, email);
+	}
+	
+	
+	@SuppressWarnings("serial")
 	private void showLoginForm() {
+		VerticalLayout layout = new VerticalLayout();
 		login = new LoginForm();
+		Button newAccount = new Button("Create new account");
+		newAccount.setStyleName(BaseTheme.BUTTON_LINK);
+		newAccount.setDescription("Create new account");
+		newAccount.addListener(new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				newAccountForm = new NewAccountPojoForm();
+				mainWindow.setContent(newAccountForm);
+			}
+			
+		}); // react to clicks
+
         login.setWidth("100%");
         login.setHeight("300px");
         login.addListener(new LoginForm.LoginListener() {
@@ -63,18 +97,16 @@ public class WebUbiquityApplication extends Application {
 				try {
 					MessageDigest md = MessageDigest.getInstance("SHA");
 					
-					ClientHandler c = new ClientHandler(null);
-					
 					String name = event.getLoginParameter("username");
 					String passwordHash = BaseConversion.toHexString(md.digest(event.getLoginParameter("password").getBytes()));
 					
-					loggedIn = c.login(name + " " + passwordHash);
+					loggedIn = client.login(name + " " + passwordHash);
 					if (loggedIn) {
-						c.setUsername(name);
+						client.setUsername(name);
 						setUser(name);
 						loggedIn = true;
 						showFileTable();
-						populateTable(c);
+						populateTable();
 					}
 					else {
 						//TODO: Authentication failed!
@@ -84,7 +116,9 @@ public class WebUbiquityApplication extends Application {
 				}
             }
         });
-        mainWindow.setContent(login);
+        layout.addComponent(login);
+        layout.addComponent(newAccount);
+        mainWindow.setContent(layout);
 	}
 
 }
