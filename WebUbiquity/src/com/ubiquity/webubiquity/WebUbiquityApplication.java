@@ -1,9 +1,18 @@
 package com.ubiquity.webubiquity;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import message.Message;
+import message.MessageCode;
+import remote.ReceiveMessageInterface;
 import server.ClientHandler;
 import util.BaseConversion;
 
@@ -30,16 +39,53 @@ public class WebUbiquityApplication extends Application {
 	private ClientHandler client;
 	private NewAccountPojoForm newAccountForm;
 	
+	private ReceiveMessageInterface rmiServer;
+	private String rmiServerAddress;
+	private int rmiServerPort;
+	
+	private Registry registry;
+	
+	private String rootFolder;
+	
 	@Override
 	public void init() {
 		mainWindow = new ListWindow("Web Ubiquity Application");
 		setMainWindow(mainWindow);
 
-		client = new ClientHandler(null);
+		//RMI initialization
+		try {
+			rmiServerAddress=InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+		} //TODO: hardcoded for now
+		rmiServerPort=10500; //TODO: hardcoded for now
+	    try{
+	        // get the “registry”
+	        registry=LocateRegistry.getRegistry(
+	        		rmiServerAddress,
+	            (new Integer(rmiServerPort)).intValue()
+	        );
+	        // look up the remote object
+	        rmiServer=
+	           (ReceiveMessageInterface)(registry.lookup("rmiServer"));
+	    }
+	    catch(RemoteException e){
+	        e.printStackTrace();
+	    }
+	    catch(NotBoundException e){
+	        e.printStackTrace();
+	    }
+		
+		client = new ClientHandler(null); //used for simple interactions with ClientHandler methods only, should be refactored
+		rootFolder = "." + System.getProperty("file.separator"); //TODO: Hardcoded for now
 		
 		loggedIn = false;
 		//ask for login first!
 		showLoginForm();
+	}
+	
+	public String getRootFolder() {
+		return rootFolder;
 	}
 	
 	private void showFileTable() {
@@ -61,10 +107,40 @@ public class WebUbiquityApplication extends Application {
 		}	
 	}
 	
+	public long getFileSize(String filepath, String deviceName) {
+		return client.getFileSize(filepath, deviceName);
+	}
+	
 	public boolean betaSignup(String username, String email) {
 		return client.betaSignup(username, email);
 	}
 	
+	public boolean downloadFile(String username, String device, String filepath) {
+		if (rmiServer == null) {
+			try{
+		        // get the “registry”
+		        registry=LocateRegistry.getRegistry(
+		            rmiServerAddress,
+		            (new Integer(rmiServerPort)).intValue());
+		        // look up the remote object
+		        rmiServer=
+		           (ReceiveMessageInterface)(registry.lookup("rmiServer"));
+		    }
+		    catch(RemoteException e){
+		        e.printStackTrace();
+		    }
+		    catch(NotBoundException e){
+		        e.printStackTrace();
+		    }
+		}
+		boolean success = false;
+		try {
+			success = rmiServer.sendMessageToClient(username, device, new Message(MessageCode.FILE_REQUEST, filepath));
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return success;
+	}
 	
 	@SuppressWarnings("serial")
 	private void showLoginForm() {

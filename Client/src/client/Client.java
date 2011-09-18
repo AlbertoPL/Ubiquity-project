@@ -140,6 +140,8 @@ public class Client implements Messageable, Runnable {
 		case MessageCode.INDEX_REQUEST:
 			break;
 		case MessageCode.FILE_REQUEST:
+			m = new Message(MessageCode.SENDING_FILE, message.getPayload());
+			sender.enqueueMessage(m);
 			break;
 		case MessageCode.SERVER_INDEX_REQUEST_ACK:
 			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(0, message.getPayload().indexOf(' '))));
@@ -149,7 +151,7 @@ public class Client implements Messageable, Runnable {
 			t.start();
 			break;
 		case MessageCode.SERVER_FILE_REQUEST_ACK:
-			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(message.getPayload().indexOf(' '))));
+			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(0, message.getPayload().indexOf(' '))));
 			m = new Message(MessageCode.SENDING_FILE,message.getPayload().substring(message.getPayload().indexOf(' ') + 1));
 			fileHandler.setFileToSendMetadata(m);
 			t = new Thread(fileHandler);

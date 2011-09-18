@@ -94,7 +94,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 					e1.printStackTrace();
 				}
 				
-				String insertString = "INSERT INTO file(\"name\", device, path, \"user\", \"type\") values(?,?,?,?,?)";
+				String insertString = "INSERT INTO file(\"name\", device, path, \"user\", \"type\", size) values(?,?,?,?,?,?)";
 				String checkString = "SELECT path FROM file WHERE path = ?"; 
 				
 				
@@ -124,8 +124,9 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 								String firstPath = line.substring(1, line.length() - 1);
 								line = read.readLine();
 								String fileType = line.substring(1, line.length() - 1);
-								read.readLine();
-								firstPath = firstPath.replace("\\", "\\\\");
+								line = read.readLine().trim();
+								long size = Long.parseLong(line);
+								//firstPath = firstPath.replace("\\", "\\\\");
 								
 								//first check to see if the path already exists in the database
 								
@@ -139,6 +140,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 										insertIndexFiles.setString(3, firstPath);
 										insertIndexFiles.setString(4, username);
 										insertIndexFiles.setString(5, fileType);
+										insertIndexFiles.setLong(6, size);
 										insertIndexFiles.executeUpdate();
 										conn.commit();
 									}
@@ -369,6 +371,60 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 			e.printStackTrace();
 		}
 		return success;
+	}
+
+	@Override
+	public long getFileSize(String username, String filepath, String deviceName) {
+		long size = 0;
+		Connection conn = null;
+	    PreparedStatement selectString = null;
+	    
+		try {
+			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		String getString = "SELECT size FROM file where \"user\"=? and path=? and device=?"; 
+		
+		if (conn != null) {
+			try {
+				selectString = conn.prepareStatement(getString);
+				conn.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				selectString.setString(1, username);
+				selectString.setString(2, filepath);
+				selectString.setString(3, deviceName);
+				ResultSet rs = selectString.executeQuery();
+				conn.commit();
+				if (rs.next()) {
+					size =  rs.getLong(1);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				try {
+					System.err.println("Transaction is being rolled back: check username or email");
+					conn.rollback();
+				} 
+				catch(SQLException excep) {
+					excep.printStackTrace();
+			    }
+			}
+		}
+		try {
+			if (selectString != null) { 
+				selectString.close(); 
+			}
+		    if (conn != null) {
+		    	conn.close();
+		    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return size;
 	}
 
 }

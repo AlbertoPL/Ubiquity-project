@@ -4,11 +4,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import message.Message;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+
+import remote.RmiServer;
 
 
 /**
@@ -24,6 +29,9 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 public class Server implements Runnable {
 
 	private final static String SERVER_PROPERTIES = "server.properties";
+	
+	@SuppressWarnings("unused")
+	private RmiServer rmiserver;
 	
 	private int port;
 	private boolean running;
@@ -50,6 +58,12 @@ public class Server implements Runnable {
 		    
 		} catch (IOException e) {
 		    System.out.println("Could not listen on port: " + port);
+		}
+		
+		try {
+			rmiserver = new RmiServer(this);
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -79,6 +93,16 @@ public class Server implements Runnable {
 		for (ClientHandler c: clientHandlers) {
 			c.stop();
 		}
+	}
+	
+	public boolean sendMessageToClient(String username, String devicename, Message m) {
+		for (ClientHandler c: clientHandlers) {
+			if (c.getUsername().equals(username) && c.getDeviceName().equals(devicename))  {
+				c.getMessageSender().enqueueMessage(m);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static void main(String... args) {

@@ -16,4 +16,5 @@ public interface DatabaseAdapter {
 	public List<Object[]> selectAllFilesFromUser(String username);
 	public boolean userExists(String username);
 	public boolean betaSignup(String username, String email);
+	public long getFileSize(String username, String filepath, String deviceName);
 }

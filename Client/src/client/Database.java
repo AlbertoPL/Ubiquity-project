@@ -81,7 +81,7 @@ public class Database {
 	    stmtSaveNewRecord.setString(1, f.getName());
 	    stmtSaveNewRecord.setString(2, f.getPath());
 	    stmtSaveNewRecord.setString(3, f.getFileType());
-	    stmtSaveNewRecord.setLong(4, f.length()/1024); //size of file in kB
+	    stmtSaveNewRecord.setLong(4, f.length()); //size of file in bytes
 	    stmtSaveNewRecord.executeUpdate();
 	    ResultSet results = stmtSaveNewRecord.getGeneratedKeys();
 	    if (results.next()) {

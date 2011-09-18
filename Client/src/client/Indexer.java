@@ -53,10 +53,8 @@ public class Indexer implements Runnable {
 							index(f);
 						}
 						else if (f.getName().contains(".")){
+							String filename = f.getAbsolutePath();
 							
-							String filename = f.getAbsolutePath() + System.getProperty("file.separator") + f.getName();
-							//System.out.println(filename);
-	
 							if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mp3")) {
 								if (!music.contains(filename)) {
 									music.add(filename);
