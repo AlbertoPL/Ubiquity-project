@@ -165,6 +165,17 @@ public class Indexer implements Runnable {
 									}
 								}
 							}
+							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".pdf")) {
+								if (!documents.contains(filename)) {
+									documents.add(filename);
+									UbiquityFile uf = new UbiquityFile(filename, "documents");
+									try {
+										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
+								}
+							}
 							else if (filename.contains(".") && filename.substring(filename.lastIndexOf('.')).equalsIgnoreCase(".mpeg")) {
 								if (!videos.contains(filename)) {
 									videos.add(filename);
@@ -305,6 +316,10 @@ public class Indexer implements Runnable {
 		
 		//export database
 		try {
+			File f = new File(client.getDatabase().getDBExportPath());
+			if (f.exists()) {
+				f.delete();
+			}
 			client.getDatabase().exportDatabase("dbexport.dex");
 		} catch (SQLException e) {
 			e.printStackTrace();

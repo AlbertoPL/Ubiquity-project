@@ -147,6 +147,7 @@ public class Client implements Messageable, Runnable {
 			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(0, message.getPayload().indexOf(' '))));
 			m = new Message(MessageCode.SENDING_FILE,message.getPayload().substring(message.getPayload().indexOf(' ') + 1));
 			fileHandler.setFileToSendMetadata(m);
+			fileHandler.setSending();
 			t = new Thread(fileHandler);
 			t.start();
 			break;
@@ -154,6 +155,7 @@ public class Client implements Messageable, Runnable {
 			fileHandler.setPort(Integer.parseInt(message.getPayload().substring(0, message.getPayload().indexOf(' '))));
 			m = new Message(MessageCode.SENDING_FILE,message.getPayload().substring(message.getPayload().indexOf(' ') + 1));
 			fileHandler.setFileToSendMetadata(m);
+			fileHandler.setSending();
 			t = new Thread(fileHandler);
 			t.start();
 			break;

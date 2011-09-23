@@ -162,7 +162,7 @@ public class ListWindow extends Window {
 						System.out.println("Downloading file: " + item.getItemProperty("File Path").toString() + " from " + item.getItemProperty("Device").toString().trim());
 						Refresher refresher = new Refresher();
 						long filesize = app.getFileSize(item.getItemProperty("File Path").toString().trim(),item.getItemProperty("Device").toString().trim());
-						refresher.addListener(new DownloadedFileListener(item.getItemProperty("File Path").toString(),item.getItemProperty("Device").toString(),filesize, ListWindow.this.getApplication()));
+						refresher.addListener(new DownloadedFileListener(item.getItemProperty("File Name").toString(),item.getItemProperty("Device").toString(),filesize, ListWindow.this.getApplication()));
 						ListWindow.this.addComponent(refresher);
 					}
 					else {

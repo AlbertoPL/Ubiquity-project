@@ -96,6 +96,13 @@ public class Server implements Runnable {
 	}
 	
 	public boolean sendMessageToClient(String username, String devicename, Message m) {
+		for (int x = 0; x < clientHandlers.size(); ++x) {
+			if (!clientHandlers.get(x).isConnected()) {
+				clientHandlers.remove(x);
+				--x;
+			}
+		}
+		
 		for (ClientHandler c: clientHandlers) {
 			if (c.getUsername().equals(username) && c.getDeviceName().equals(devicename))  {
 				c.getMessageSender().enqueueMessage(m);

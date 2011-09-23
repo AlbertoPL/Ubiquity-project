@@ -20,6 +20,11 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 	public PostgresDatabaseAdapter() {
 		props.setProperty("user","postgres");
 		props.setProperty("password","bob");
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -32,7 +37,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 		PreparedStatement login = null;
 				
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -89,7 +94,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 			    PreparedStatement checkIndex = null;
 			    
 				try {
-					conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+					conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -194,7 +199,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 	    PreparedStatement getIndex = null;
 	    
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -251,7 +256,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 	    PreparedStatement getUser = null;
 	    
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -329,7 +334,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 	    PreparedStatement insertString = null;
 	    
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -380,7 +385,7 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 	    PreparedStatement selectString = null;
 	    
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql:Ubiquity", props);
+			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity", props);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}

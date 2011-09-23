@@ -24,11 +24,24 @@ public class FileHandler implements Runnable {
 	
 	private String hostname;
 	private int port;
+	private boolean sending;
+	private boolean receiving;
+	
 	
 	public FileHandler(Client client) {
 		fileSender = new FileSender(client.getRootFolder());		
 	    fileReceiver = new FileReceiver(client, client.getRootFolder());
 	    hostname = client.getHost();
+	    sending = false;
+	    receiving = false;
+	}
+	
+	public void setSending() {
+		sending = true;
+	}
+	
+	public void setReceiving() {
+		receiving = true;
 	}
 	
 	//set port always before starting the thread
@@ -46,13 +59,18 @@ public class FileHandler implements Runnable {
 		try {
 		    clientSocket = new Socket(hostname, port);
 		    
-		    fileSender.setDataOutputStream(new DataOutputStream(clientSocket.getOutputStream()));
-		    Thread t = new Thread(fileSender);
-		    t.start();
+		    Thread t = null;
+		    if (sending) {
+		    	fileSender.setDataOutputStream(new DataOutputStream(clientSocket.getOutputStream()));
+		    	t = new Thread(fileSender);
+		    	t.start();
+		    }
 			    
-		    fileReceiver.setDataInputStream(new DataInputStream(clientSocket.getInputStream()));
-		    t = new Thread(fileReceiver);
-		    t.start();
+		    if (receiving) {
+		    	fileReceiver.setDataInputStream(new DataInputStream(clientSocket.getInputStream()));
+		    	t = new Thread(fileReceiver);
+		    	t.start();
+		    }
 		} catch (IOException e) {
 		    System.out.println("Accept failed: " + port);
 		}
@@ -70,6 +88,8 @@ public class FileHandler implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
+		sending = false;
+		receiving = false;
 	}
 	
 }

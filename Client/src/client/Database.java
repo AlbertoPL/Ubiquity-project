@@ -26,6 +26,10 @@ public class Database {
 	    System.setProperty("derby.system.home", systemDir);
 	}
 	
+	public String getDBExportPath() {
+		return System.getProperty("derby.system.home") + System.getProperty("file.separator") + "dbexport.dex";
+	}
+	
 	public void connectToDB() {
 		try {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
@@ -59,7 +63,7 @@ public class Database {
 	    Statement statement = null;
 	    try {
 	        statement = dbConnection.createStatement();
-	        statement.execute("CREATE table APP.FILE (ID INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),FILENAME VARCHAR(256), FILEPATH VARCHAR(1024),FILETYPE VARCHAR(32),FILESIZE INTEGER)");
+	        statement.execute("CREATE table APP.FILE (ID INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),FILENAME VARCHAR(256), FILEPATH VARCHAR(65535),FILETYPE VARCHAR(32),FILESIZE INTEGER)");
 	        bCreatedTables = true;
 	    } catch (SQLException ex) {
 	        ex.printStackTrace();

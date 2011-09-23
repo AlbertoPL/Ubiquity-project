@@ -16,16 +16,16 @@ public class DownloadedFileListener implements RefreshListener {
 	private Application app;
 	
 	public DownloadedFileListener(String fileName, String deviceName, long fileSize, Application app) {
-		File f = new File(fileName.trim());
-		this.fileName = f.getName();
 		this.deviceName = deviceName.trim();
 		this.fileSize = fileSize;
+		File f = new File(System.getProperty("user.home") + System.getProperty("file.separator") + app.getUser().toString() + System.getProperty("file.separator") + this.deviceName + System.getProperty("file.separator") + fileName);
+		this.fileName = f.getAbsolutePath();
 		this.app = app;
 	}
 
 	@Override
 	public void refresh(Refresher source) {
-		File f = new File(app.getUser().toString() + System.getProperty("file.separator") + deviceName + System.getProperty("file.separator") + fileName);
+		File f = new File(fileName);
 		System.out.println(f.getAbsolutePath());
 		System.out.println("F.LENGTH = " + f.length());
 		System.out.println("FILESIZE = " + fileSize);

@@ -217,6 +217,7 @@ public class ClientHandler implements Messageable, Runnable {
 	    		}
 	    	}
 	    }
+	    stop();
 	}
 
 	@Override
