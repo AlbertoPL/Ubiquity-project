@@ -18,7 +18,7 @@ public class Database {
 	}
 	
 	private void setDBSystemDir() {
-	    // Decide on the db system directory: <userhome>/.addressbook/
+	    // Decide on the db system directory: <userhome>/.ubiquity/
 	    String userHomeDir = System.getProperty("user.home", ".");
 	    String systemDir = userHomeDir + System.getProperty("file.separator") + ".ubiquity";
 
@@ -63,7 +63,7 @@ public class Database {
 	    Statement statement = null;
 	    try {
 	        statement = dbConnection.createStatement();
-	        statement.execute("CREATE table APP.FILE (ID INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),FILENAME VARCHAR(256), FILEPATH VARCHAR(65535),FILETYPE VARCHAR(32),FILESIZE INTEGER)");
+	        statement.execute("CREATE table APP.FILE (ID INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),FILENAME LONG VARCHAR, FILEPATH LONG VARCHAR,FILETYPE VARCHAR(32),FILESIZE INTEGER)");
 	        bCreatedTables = true;
 	    } catch (SQLException ex) {
 	        ex.printStackTrace();
