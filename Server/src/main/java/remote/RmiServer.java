@@ -21,7 +21,7 @@ public class RmiServer extends java.rmi.server.UnicastRemoteObject implements Re
     Server server;
 
     // This method is called from the remote client by the RMI.
-    // This is the implementation of the “ReceiveMessageInterface”.
+    // This is the implementation of the ï¿½ReceiveMessageInterfaceï¿½.
 	public boolean sendMessageToClient(String username, String devicename, Message m) throws RemoteException {
 		return server.sendMessageToClient(username, devicename, m);
 	}
@@ -37,7 +37,7 @@ public class RmiServer extends java.rmi.server.UnicastRemoteObject implements Re
             throw new RemoteException("can't get inet address.");
         }
 
-        thisPort=10500;  // this port(registry’s port)
+        thisPort=10500;  // this port(registry's port)
 
         System.out.println("this address="+thisAddress+",port="+thisPort);
 
