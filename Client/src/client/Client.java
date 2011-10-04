@@ -77,7 +77,7 @@ public class Client implements Messageable, Runnable {
 		connected = false;
 	}
 	
-	//Web client version
+	//Web client version TODO:deprecated
 	public Client(String host, int port) {
 		this.port = port;
 		hostname = host;

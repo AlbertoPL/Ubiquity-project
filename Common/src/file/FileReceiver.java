@@ -76,7 +76,7 @@ public class FileReceiver implements Runnable {
 				while (fileLength > 0) { // Index file being sent
 					if (fileLength > BUFFER) {
 						bytesRead = in.read(mybytearray);
-					} 
+					}
 					else {
 						bytesRead = in.read(mybytearray, 0, (int) fileLength);
 					}

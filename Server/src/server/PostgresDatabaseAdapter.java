@@ -130,9 +130,14 @@ public class PostgresDatabaseAdapter implements DatabaseAdapter {
 								line = read.readLine();
 								String fileType = line.substring(1, line.length() - 1);
 								line = read.readLine().trim();
-								long size = Long.parseLong(line);
-								//firstPath = firstPath.replace("\\", "\\\\");
-								
+								long size = 0;
+								try {
+									size = Long.parseLong(line);
+								}
+								catch (NumberFormatException e) {
+									e.printStackTrace();
+									System.err.println("Offending line: " + line);
+								}
 								//first check to see if the path already exists in the database
 								
 								try {
