@@ -1,5 +1,0 @@
-INDEX VERSION 1.126+C:\Users\Alberto\Ubiquity\.metadata\.plugins\org.eclipse.jdt.core
-3112872934.index
-137624701.index
-2679596408.index
-714836089.index
