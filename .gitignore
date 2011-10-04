@@ -1,1 +1,11 @@
 bin
+*.class
+*.dll
+*.exe
+*.o
+*.com
+*.so
+.metadata
+client.properties
+server.properties
+.classpath
