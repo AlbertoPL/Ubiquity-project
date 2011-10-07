@@ -1,6 +1,7 @@
 package message;
 
 import java.io._
+import java.net._
 
 /**
  * Defines methods that clients and servers must implement in order to 
@@ -14,6 +15,9 @@ trait Messageable {
   var loggedIn: Boolean
   var osName: String
   var rootFolder: String
+  var socket: Socket
+  var fileSocket: Socket
+  var messageSender: MessageSender
 
   /**
    * 
@@ -27,9 +31,40 @@ trait Messageable {
   def receiverDisconnected: Unit
   def fileReceivedCallback(filename: String, message: Message): Unit
   
-  def inputStream: InputStream
-  def outputStream: OutputStream 
-  def fileInputStream: FileInputStream
-  def fileOutputStream: FileOutputStream
+  def inputStream: InputStream = {
+    try {
+      return socket.getInputStream
+    } catch {
+      case e: IOException => e.printStackTrace
+    }
+	null
+  }
+  def outputStream: OutputStream = {
+    try {
+      return socket.getOutputStream
+    } catch {
+      case e: IOException => e.printStackTrace
+    }
+	null
+  }
+  
+  def fileInputStream = {
+    try {
+      fileSocket.getInputStream
+    } catch {
+      case e: IOException => e.printStackTrace
+    }
+    null
+  }
+  
+  def fileOutputStream = {
+    try {
+      fileSocket.getOutputStream
+    } catch {
+      case e: IOException => e.printStackTrace
+    }
+    null
+  }
+  
   def deviceName: String
 }

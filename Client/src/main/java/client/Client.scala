@@ -45,21 +45,21 @@ object Client {
   }
 }
 
-class Client extends Runnable with Messageable {
+final class Client extends Runnable with Messageable {
   var host: String = _
   var port: Int = _
   var osName: String = _
   var rootFolder: String = _
   var connected: Boolean = false
   var loggedIn: Boolean = false
+  var socket: Socket  = _
+  var fileSocket: Socket = _
+  var messageSender: MessageSender = _
   
   var indexer: Indexer = _
   var database: Database = _
-  var messageSender: MessageSender = _
   var receiver: MessageReceiver = _
   var running: Boolean = _
-  var socket: Socket  = _
-  var fileSocket: Socket = _
   var fileHandler: FileHandler = _
   var fileMonitor: FileMonitor = _
   
@@ -262,43 +262,7 @@ class Client extends Runnable with Messageable {
       }
     }
   }
-
-  override def inputStream = {
-    try {
-      socket.getInputStream
-    } catch {
-      case e: IOException => e.printStackTrace
-    }
-    null
-  }
-
-  override def outputStream = {
-    try {
-      socket.getOutputStream
-    } catch {
-      case e: IOException => e.printStackTrace
-    }
-    null
-  }
   
-  override def fileInputStream = {
-    try {
-      fileSocket.getInputStream
-    } catch {
-      case e: IOException => e.printStackTrace
-    }
-    null
-  }
-  
-  override def fileOutputStream = {
-    try {
-      fileSocket.getOutputStream
-    } catch {
-      case e: IOException => e.printStackTrace
-    }
-    null
-  }
-
   override def deviceName = {
     try {
       InetAddress.getLocalHost().getHostName
