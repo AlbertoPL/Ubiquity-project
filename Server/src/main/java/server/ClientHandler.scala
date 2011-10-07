@@ -22,7 +22,7 @@ class ClientHandler(var socket: Socket) extends Runnable with Messageable {
   var messageSender: MessageSender = _
   
   var running: Boolean
-  var receiver: MessageReceiver
+  var receiver: MessageReceiver = _
   var fileServer: FileServer
   var fileSocket: Socket
   var deviceName: String
