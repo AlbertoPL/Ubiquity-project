@@ -18,7 +18,7 @@ import message.MessageCode
 import message.MessageReceiver
 import message.MessageSender
 import message.Messageable
-import util.BaseConversion;
+import util.BaseConversion
 import javax.swing.JComponent
 
 /**
@@ -45,16 +45,9 @@ object Client {
   }
 }
 
-final class Client extends Runnable with Messageable {
-  var host: String = _
-  var port: Int = _
-  var osName: String = _
+class Client extends Runnable with Messageable {
+	
   var rootFolder: String = _
-  var connected: Boolean = false
-  var loggedIn: Boolean = false
-  var socket: Socket  = _
-  var fileSocket: Socket = _
-  var messageSender: MessageSender = _
   
   var indexer: Indexer = _
   var database: Database = _

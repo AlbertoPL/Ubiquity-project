@@ -11,8 +11,6 @@ import java.util.List;
 import message.Message;
 import message.MessageCode;
 
-
-
 /**
  * 
  * @author Alberto Pareja-Lecaros
@@ -60,7 +58,7 @@ public class Indexer implements Runnable {
 									music.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "music");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -71,7 +69,7 @@ public class Indexer implements Runnable {
 									music.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "music");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -82,7 +80,7 @@ public class Indexer implements Runnable {
 									music.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "music");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -93,7 +91,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -104,7 +102,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -115,7 +113,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -126,7 +124,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -137,7 +135,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -148,7 +146,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -159,7 +157,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -170,7 +168,7 @@ public class Indexer implements Runnable {
 									documents.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "documents");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -181,7 +179,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -192,7 +190,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -203,7 +201,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -214,7 +212,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -225,7 +223,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -236,7 +234,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -247,7 +245,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -258,7 +256,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -269,7 +267,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -280,7 +278,7 @@ public class Indexer implements Runnable {
 									videos.add(filename);
 									UbiquityFile uf = new UbiquityFile(filename, "videos");
 									try {
-										uf.setDbID(client.getDatabase().addNewFileToDB(uf));
+										uf.setDbID(client.database().addNewFileToDB(uf));
 									} catch (SQLException e) {
 										e.printStackTrace();
 									}
@@ -305,8 +303,8 @@ public class Indexer implements Runnable {
 		File root = new File(System.getProperty("user.home"));
 		
 		//try to connect to the database
-		if (!client.getDatabase().isConnected()) {
-			client.getDatabase().connectToDB();
+		if (!client.database().isConnected()) {
+			client.database().connectToDB();
 		}
 		
 		index(root);
@@ -316,19 +314,19 @@ public class Indexer implements Runnable {
 		
 		//export database
 		try {
-			File f = new File(client.getDatabase().getDBExportPath());
+			File f = new File(client.database().getDBExportPath());
 			if (f.exists()) {
 				f.delete();
 			}
-			client.getDatabase().exportDatabase("dbexport.dex");
+			client.database().exportDatabase("dbexport.dex");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
 		//enqueue the database file 
-		if (client.getMessageSender() != null) {
+		if (client.messageSender() != null) {
 			Message m = new Message(MessageCode.SENDING_INDEX, System.getProperty("derby.system.home") + File.separator + "dbexport.dex");
-			client.getMessageSender().enqueueMessage(m);
+			client.messageSender().enqueueMessage(m);
 		}
 	}
 	

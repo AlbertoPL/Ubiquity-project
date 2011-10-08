@@ -36,7 +36,7 @@ class Server extends Runnable {
 
 	var port: Int = _
 	var running: Boolean =_
-	var clientHandlers: List[ClientHandler] = _
+	var clientHandlers: Seq[ClientHandler] = _
 	var serverSocket: ServerSocket = _
 	
 	def init {

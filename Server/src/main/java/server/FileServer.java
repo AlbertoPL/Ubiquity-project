@@ -25,8 +25,8 @@ public class FileServer implements Runnable {
 	private FileReceiver fileReceiver;
 
 	public FileServer(ClientHandler handler) {
-		fileSender = new FileSender(handler.getRootFolder());		
-	    fileReceiver = new FileReceiver(handler, handler.getRootFolder());
+		fileSender = new FileSender(handler.rootFolder());		
+	    fileReceiver = new FileReceiver(handler, handler.rootFolder());
 		
 	    boolean success = false;
 	    while (!success) {

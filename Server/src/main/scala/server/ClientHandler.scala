@@ -1,32 +1,32 @@
 package server
 
-import java.io._
+import java.lang.InterruptedException
+import java.lang.Runnable
+import java.lang.String
+import java.lang.System
+import java.lang.Thread
 import java.net.Socket
-import java.util.List
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.asScalaBuffer
 
-import message._
+import message.Message
+import message.MessageCode
+import message.MessageReceiver
+import message.MessageSender
+import message.Messageable
 
 object ClientHandler {
   val maxLoginTries = 3 
 }
 
-class ClientHandler(var socket: Socket) extends Runnable with Messageable {
+class ClientHandler(var s: Socket) extends Runnable with Messageable {
 
-  var host: String = _
-  var port: Int = _
-  var osName: String = _
-  var connected: Boolean = false
-  var loggedIn: Boolean = false
-  var messageSender: MessageSender = _
-  
-  var running: Boolean
+  socket = s
+  var running: Boolean = _
   var receiver: MessageReceiver = _
-  var fileServer: FileServer
-  var fileSocket: Socket
-  var deviceName: String
-  var osType: String
+  var fileServer: FileServer = _
+  var deviceName: String = _
+  var osType: String = _
   var username: String = _
   var loginTries: Int = 0
   var database: DatabaseAdapter = new PostgresDatabaseAdapter

@@ -1,4 +1,4 @@
-package message;
+package message
 
 import java.io._
 import java.net._
@@ -9,15 +9,14 @@ import java.net._
  */
 trait Messageable {
   
-  var host: String
-  var port: Int
-  var connected: Boolean
-  var loggedIn: Boolean
-  var osName: String
-  var rootFolder: String
-  var socket: Socket
-  var fileSocket: Socket
-  var messageSender: MessageSender
+  var host: String =_
+  var port: Int = _
+  var connected: Boolean = _
+  var loggedIn: Boolean = _
+  var osName: String = _
+  var socket: Socket = _
+  var fileSocket: Socket = _
+  var messageSender: MessageSender = _
 
   /**
    * 
@@ -39,6 +38,7 @@ trait Messageable {
     }
 	null
   }
+  
   def outputStream: OutputStream = {
     try {
       return socket.getOutputStream
@@ -67,4 +67,6 @@ trait Messageable {
   }
   
   def deviceName: String
+  
+  def rootFolder: String
 }
