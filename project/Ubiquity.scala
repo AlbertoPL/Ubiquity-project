@@ -11,9 +11,9 @@ object Ubiquity extends Build {
   
   lazy val client: Project = Project(id       = "Client", 
 				     base     = file("Client"), 
-				     settings = Defaults.defaultSettings ++ ScalariformPlugin.settings).dependsOn(common)
+				     settings = Defaults.defaultSettings ++ ScalariformPlugin.settings) dependsOn(common)
   
   lazy val server: Project = Project(id       = "Server", 
 				     base     = file("Server"), 
-				     settings = Defaults.defaultSettings ++ ScalariformPlugin.settings).dependsOn(common)
+				     settings = Defaults.defaultSettings ++ ScalariformPlugin.settings) dependsOn(common)
 }
