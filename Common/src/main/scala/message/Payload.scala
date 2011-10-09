@@ -18,7 +18,7 @@ case class IndexRequest extends AsyncMessage
 case class IndexRequestAck(port: Int, payload: String) extends AsyncMessage
 case class IndexSending(absolutePath: String) extends AsyncMessage
 
-case class DeviceInfo(name: String, os:String) extends AsyncMessage
+case class DeviceInfo(name: String, os: String) extends AsyncMessage
 case class DeviceInfoRequest extends AsyncMessage
 case class DeviceNotSupported(name: String, os: String) extends AsyncMessage
 
