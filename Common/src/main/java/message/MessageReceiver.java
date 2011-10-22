@@ -25,7 +25,7 @@ public class MessageReceiver implements Runnable {
 		connected = false;
 		if (in == null) {
 			try {
-				in = new ObjectInputStream(master.getInputStream());
+				in = new ObjectInputStream(master.inputStream());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -62,9 +62,9 @@ public class MessageReceiver implements Runnable {
 	@Override
 	public void run() {
 		running = true;
-		connected = master.isConnected();
+		connected = master.connected();
 		while (running) {
-			while (master.isConnected() && connected && in != null) {
+			while (master.connected() && connected && in != null) {
 				try {
 					Message m = (Message) in.readObject();
 					if (m.getCode() == -1) {
@@ -92,6 +92,5 @@ public class MessageReceiver implements Runnable {
 			} //sleep 3 seconds
 		}
 		//tell the client handler that the message receiver has failed.
-		
 	}
 }

@@ -10,9 +10,6 @@ import server.Server;
 
 public class RmiServer extends java.rmi.server.UnicastRemoteObject implements ReceiveMessageInterface {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = -2401572816494063347L;
 	int thisPort;
     String thisAddress;
@@ -21,7 +18,7 @@ public class RmiServer extends java.rmi.server.UnicastRemoteObject implements Re
     Server server;
 
     // This method is called from the remote client by the RMI.
-    // This is the implementation of the �ReceiveMessageInterface�.
+    // This is the implementation of the ReceiveMessageInterface.
 	public boolean sendMessageToClient(String username, String devicename, Message m) throws RemoteException {
 		return server.sendMessageToClient(username, devicename, m);
 	}

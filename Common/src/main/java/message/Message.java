@@ -3,14 +3,9 @@ package message;
 import java.io.Serializable;
 
 public class Message implements Serializable {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6621680135548538902L;
 	private int code;
 	private String payload;
-	private String protocol;
 	
 	/**
 	 * Constructor which initializes the code and payload. The protocol
@@ -22,19 +17,6 @@ public class Message implements Serializable {
 	public Message(int code, String payload) {
 		this.code = code;
 		this.payload = payload;
-		protocol = "TCP"; //default is TCP
-	}
-	
-	/**
-	 * Constructor which takes the code, payload, and protocol for this message
-	 * 
-	 * @param code - the integer code representing the type of message
-	 * @param payload - the data contained within this message
-	 * @param protocol - the protocol to be used for transmission as a string
-	 */
-	public Message(int code, String payload, String protocol) {
-		this(code, payload);
-		this.protocol = protocol;
 	}
 	
 	/**
@@ -53,15 +35,5 @@ public class Message implements Serializable {
 	 */
 	public String getPayload() {
 		return payload;
-	}
-	
-	/**
-	 * Returns the string representation of the protocol to be used for 
-	 * transmitting this message.
-	 * 
-	 * @return protocol - the protocol to be used for transmitting this message
-	 */
-	public String getProtocol() {
-		return protocol;
 	}
 }
