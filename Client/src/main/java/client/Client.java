@@ -38,7 +38,7 @@ import util.BaseConversion;
  */
 public class Client implements Messageable, Runnable {
 
-	private final static String CLIENT_PROPERTIES = "client.properties";
+	private final static String CLIENT_PROPERTIES = "src/main/resources/client.properties";
 		
 	private Indexer indexer;
 	private FileMonitor fileMonitor;

@@ -28,7 +28,7 @@ import remote.RmiServer;
  */
 public class Server implements Runnable {
 
-	private final static String SERVER_PROPERTIES = "server.properties";
+	private final static String SERVER_PROPERTIES = "src/main/resources/server.properties";
 	
 	@SuppressWarnings("unused")
 	private RmiServer rmiserver;
