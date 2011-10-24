@@ -8,11 +8,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import message.Message;
 import message.MessageCode;
 import remote.ReceiveMessageInterface;
+import scala.collection.immutable.Vector;
 import server.ClientHandler;
 import util.BaseConversion;
 
@@ -60,7 +60,7 @@ public class WebUbiquityApplication extends Application {
 		} //TODO: hardcoded for now
 		rmiServerPort=10500; //TODO: hardcoded for now
 	    try{
-	        // get the “registry”
+	        // get the ï¿½registryï¿½
 	        registry=LocateRegistry.getRegistry(
 	        		rmiServerAddress,
 	            (new Integer(rmiServerPort)).intValue()
@@ -97,18 +97,19 @@ public class WebUbiquityApplication extends Application {
 	}
 	
 	private void populateTable() {
-		List<Object[]> files = client.getAllUserFiles();
+		Vector<String[]> files = client.allUserFiles();
 		
 		int count = 0;
 		if (files != null) {
-			for (Object[] o: files) {
-			mainWindow.getTable().addItem(o,new Integer(count++));
+			scala.collection.Iterator<String[]> iter = files.iterator();
+			while (iter.hasNext()) {
+				mainWindow.getTable().addItem(iter.next(),new Integer(count++));
 			}
 		}	
 	}
 	
 	public long getFileSize(String filepath, String deviceName) {
-		return client.getFileSize(filepath, deviceName);
+		return client.fileSize(filepath, deviceName);
 	}
 	
 	public boolean betaSignup(String username, String email) {
@@ -118,7 +119,7 @@ public class WebUbiquityApplication extends Application {
 	public boolean downloadFile(String username, String device, String filepath) {
 		if (rmiServer == null) {
 			try{
-		        // get the “registry”
+		        // get the ï¿½registryï¿½
 		        registry=LocateRegistry.getRegistry(
 		            rmiServerAddress,
 		            (new Integer(rmiServerPort)).intValue());

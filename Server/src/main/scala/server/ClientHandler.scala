@@ -22,6 +22,7 @@ object ClientHandler {
 class ClientHandler(var s: Socket) extends Runnable with Messageable {
 
   socket = s
+  loggedIn = false
   var running: Boolean = _
   var receiver: MessageReceiver = _
   var fileServer: FileServer = _
@@ -63,6 +64,7 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
         messageSender.enqueueMessage(m)
       } else if (code == MessageCode.NAME_AND_OS) {
         var payload = message.getPayload
+        System.out.println("PAYLOAD: " + payload)
         var os = payload.substring(0, payload.indexOf(':')).trim
         var name = payload.substring(payload.indexOf(':') + 1).trim
         System.out.println("NAME: " + name)
@@ -110,17 +112,19 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
   override def receiverDisconnected = stop
 
   override def run() {
+    System.out.println("Connection succeeded");
     running = true
+    connected = true
+
     messageSender = new MessageSender(this)
-    var t = new Thread(messageSender)
-    t.start
+    //var t = new MessageSender(messageSender)
+    messageSender.start
+    System.out.println("Connection still succeeded")
 
     //XXX this seems wrong. using t over again?
     receiver = new MessageReceiver(this)
-    t = new Thread(receiver)
-    t.start
+    receiver.start
 
-    connected = true
     System.out.println("Request authentication")
     var m = new Message(MessageCode.SERVER_REQUEST_AUTH, null)
     messageSender.enqueueMessage(m)
@@ -168,4 +172,8 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
 
   def fileSize(filepath: String, nameOfDevice: String) =
     database.getFileSize(username, filepath, nameOfDevice)
+
+  def setUsername(name: String) {
+    username = name
+  }
 }

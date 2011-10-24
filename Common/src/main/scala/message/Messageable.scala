@@ -13,7 +13,6 @@ trait Messageable {
   var port: Int = _
   var connected: Boolean = _
   var loggedIn: Boolean = _
-  var osName: String = _
   var socket: Socket = _
   var fileSocket: Socket = _
   var messageSender: MessageSender = _
@@ -69,4 +68,6 @@ trait Messageable {
   def deviceName: String
 
   def rootFolder: String
+
+  def osType: String
 }

@@ -22,11 +22,12 @@ import remote.RmiServer;
  * including the BackupAdapter, the DatabaseAdapter, and the FileServer.
  */
 object Server {
-  val serverPropertiesFilename = "server.properties"
+  val serverPropertiesFilename = "src/main/resources/server.properties"
   var validOsTypes: List[_] = _
 
   def main(args: Array[String]) {
     var s = new Server
+    s.init
     var t = new Thread(s)
     t.start
   }

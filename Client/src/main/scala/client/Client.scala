@@ -36,7 +36,7 @@ object Client {
 
   def main(args: Array[String]) {
     val properties = new Properties
-    properties.load(new FileInputStream("client.properties"))
+    properties.load(new FileInputStream("src/main/resources/client.properties"))
     var c: Client = new Client
     c.startWithDefaults(properties)
     var t: Thread = new Thread(c)
@@ -146,7 +146,7 @@ class Client extends Runnable with Messageable {
         t = new Thread(fileHandler)
         t.start()
       case MessageCode.REQUEST_NAME_AND_OS =>
-        m = new Message(MessageCode.NAME_AND_OS, osName + ":" + deviceName)
+        m = new Message(MessageCode.NAME_AND_OS, osType + ":" + deviceName)
         messageSender.enqueueMessage(m)
       case _ =>
         System.err.println("INVALID MESSAGE CODE DETECTED: " + message.getCode())
@@ -154,6 +154,7 @@ class Client extends Runnable with Messageable {
   }
 
   def login {
+    System.out.println("Login")
     var username = JOptionPane.showInputDialog("Username:");
     var md: MessageDigest = null;
     try {
@@ -176,7 +177,7 @@ class Client extends Runnable with Messageable {
     }
   }
 
-  def connect = {
+  def connect {
     try {
       socket = new Socket(host, port);
     } catch {
@@ -185,18 +186,17 @@ class Client extends Runnable with Messageable {
       case ioe: IOException =>
         ioe.printStackTrace
     }
-
+    println("We have connected")
     if (socket != null) {
-      messageSender = new MessageSender(this)
-      var t = new Thread(messageSender)
-      t.start
-
-      receiver = new MessageReceiver(this)
-      t = new Thread(receiver)
-      t.start
-
       connected = true
       connected
+
+      messageSender = new MessageSender(this)
+      //var t = new Thread(messageSender)
+      messageSender.start
+
+      receiver = new MessageReceiver(this)
+      receiver.start
     } else {
       false
     }
@@ -264,6 +264,10 @@ class Client extends Runnable with Messageable {
         ""
       }
     }
+  }
+
+  override def osType = {
+    System.getProperty("os.name")
   }
 
   override def fileReceivedCallback(file: String, m: Message) {

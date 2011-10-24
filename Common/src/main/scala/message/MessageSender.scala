@@ -5,6 +5,8 @@ import java.io.ObjectOutputStream
 import java.io.OutputStream
 import java.util.ArrayList
 import java.util.List
+import scala.actors.Actor
+import scala.actors.Actor._
 
 object MessageSender {
   val timeout = 3000
@@ -19,12 +21,12 @@ object MessageSender {
   }
 }
 
-class MessageSender(c: Messageable) extends Runnable {
+class MessageSender(c: Messageable) extends Actor {
 
   var running: Boolean = false
   var master: Messageable = c
-  var messageQueue: List[Message] = _
-  var out: ObjectOutputStream = _
+  var messageQueue: List[Message] = new ArrayList[Message]
+  var out: ObjectOutputStream = new ObjectOutputStream(master.outputStream)
 
   def enqueueMessage(m: Message) {
     messageQueue.add(m);
@@ -41,8 +43,9 @@ class MessageSender(c: Messageable) extends Runnable {
     running = false;
   }
 
-  override def run() {
-    running = true;
+  override def act() {
+    running = true
+
     while (running) {
       while (master.connected && out != null) {
         var m = dequeueMessage
