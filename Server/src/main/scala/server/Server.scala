@@ -30,6 +30,8 @@ object Server {
     s.init
     var t = new Thread(s)
     t.start
+
+    var rmi = new RmiServer(s);
   }
 }
 
