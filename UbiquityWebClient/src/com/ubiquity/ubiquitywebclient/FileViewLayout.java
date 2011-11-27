@@ -1,7 +1,10 @@
 package com.ubiquity.ubiquitywebclient;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 
@@ -14,7 +17,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
@@ -154,13 +156,25 @@ public class FileViewLayout extends VerticalLayout {
 							final Window dialog = new Window("Enter user name to share with");
 					        dialog.setModal(true);
 					        FileViewLayout.this.getWindow().addWindow(dialog);
-					        TextField user = new TextField("Username");
+					        final TextField user = new TextField("Username");
 					        Button ok = new Button("Share!");
 					        ok.addListener(new Button.ClickListener() {
 
 								@Override
 								public void buttonClick(ClickEvent event) {
-									//save user-file pair in DB
+									
+									String filetype = "NONE";
+									if (root.getName().endsWith(".mp3") || root.getName().endsWith(".wav") || root.getName().endsWith(".mid")) {
+										filetype = "music";
+									}
+									else if (root.getName().endsWith(".doc") || root.getName().endsWith(".odt") || root.getName().endsWith(".ppt") || root.getName().endsWith(".xls") || root.getName().endsWith(".pptx") || root.getName().endsWith(".docx") || root.getName().endsWith(".xlsx") || root.getName().endsWith(".pdf")) {
+										filetype = "document";
+									}
+									else if (root.getName().endsWith(".mpeg") || root.getName().endsWith(".avi") || root.getName().endsWith(".mkv") || root.getName().endsWith(".mp4") || root.getName().endsWith(".ogg") || root.getName().endsWith(".ogm") || root.getName().endsWith(".m4v") || root.getName().endsWith(".flv") || root.getName().endsWith(".f4v") || root.getName().endsWith(".ifo")) {
+										filetype = "video";
+									}
+									shareFile(root.getName(),currentPath,filetype, (String) user.getValue());
+									//TODO: save user-file pair in DB 
 								}
 					        	
 					        });
@@ -286,7 +300,30 @@ public class FileViewLayout extends VerticalLayout {
         
         this.addComponent(tabs);
     }
-
-       
-
+    
+    private boolean shareFile(String filename, String filepath, String filetype, String shareWith) {
+    	Socket clientSocket;
+		try {
+			UbiquityClientApplication app = (UbiquityClientApplication) FileViewLayout.this.getApplication();
+			clientSocket = new Socket("testubiquity.info", 14444);
+			PrintWriter outToServer = new PrintWriter(clientSocket.getOutputStream(),true);
+			  outToServer.println(app.getUser());
+			  outToServer.println(app.getPasswordHash());
+			  
+			  outToServer.println(filename);
+			  outToServer.println(filepath);
+			  outToServer.println(filetype);
+			  outToServer.println(InetAddress.getLocalHost().getHostName());
+			  outToServer.println(shareWith);
+			  clientSocket.close();
+			  return true;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+    }
 }

@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 
 import com.vaadin.Application;
 import com.vaadin.ui.LoginForm;
@@ -27,6 +29,7 @@ public class UbiquityClientApplication extends Application {
 	private FileViewLayout mainLayout;
 	private Window mainWindow;
 	private Thread dnsUpdate;
+	private Database database;
 	
 	@Override
 	public void init() {
@@ -64,26 +67,29 @@ public class UbiquityClientApplication extends Application {
 				}
 				
 			});
+		
+		database = new Database();
+		
 		showLoginForm();
 	    }
 	
-	private boolean sendUpdate(String username) {
+	private boolean login(String username) {
 		  Socket clientSocket;
+		  boolean success = false;
 		try {
-			clientSocket = new Socket("testubiquity.info", 14443);
+			clientSocket = new Socket("testubiquity.info", 14445);
 			PrintWriter outToServer = new PrintWriter(clientSocket.getOutputStream(),true);
 			  outToServer.println(username);
 			  outToServer.println(this.passwordHash);
-			  URL whatismyip = new URL("http://www.whatismyip.org");
-			  BufferedReader in = new BufferedReader(new InputStreamReader(
-			                  whatismyip.openStream()));
-
-			  String ip = in.readLine(); //you get the IP as a String
-
-			  outToServer.println(ip);
-			  in.close();
+			  outToServer.println(InetAddress.getLocalHost().getHostName());
+			  outToServer.println(System.getProperty("os.name"));
+			  BufferedReader inFromClient = new BufferedReader(new InputStreamReader(
+					  clientSocket.getInputStream()));
+			  String successString = inFromClient.readLine();
+			  if (successString.equalsIgnoreCase("true")) {
+				  success = true;
+			  }
 			  clientSocket.close();
-			  return true;
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -91,7 +97,7 @@ public class UbiquityClientApplication extends Application {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
+		return success;
 		  
 	}
 	
@@ -109,6 +115,7 @@ public class UbiquityClientApplication extends Application {
 			  String ip = in.readLine(); //you get the IP as a String
 
 			  outToServer.println(ip);
+			  outToServer.println(InetAddress.getLocalHost().getHostName());
 			  in.close();
 			  clientSocket.close();
 			  return true;
@@ -169,14 +176,37 @@ public class UbiquityClientApplication extends Application {
 					String name = event.getLoginParameter("username");
 					UbiquityClientApplication.this.passwordHash = BaseConversion.toHexString(md.digest(event.getLoginParameter("password").getBytes()));
 					
-					loggedIn = sendUpdate(name);
-					if (loggedIn) {
-						setUser(name);
-						loggedIn = true;
-						dnsUpdate.start();
-						mainWindow.setContent(UbiquityClientApplication.this.mainLayout);
+					if (!database.isConnected()) {
+						database.connectToDB();
+					}
+					boolean correctUser = false;
+					
+					try {
+						if (database.checkUserExists()) {
+							correctUser = database.checkCorrectUser(name, passwordHash);
+						}
+						else {
+							correctUser = database.setUser(name, passwordHash);
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+					
+					if (correctUser) {
+						loggedIn = login(name);
+						if (loggedIn) {
+							setUser(name);
+							loggedIn = true;
+							dnsUpdate.start();
+							mainWindow.setContent(UbiquityClientApplication.this.mainLayout);
+						}
+						else {
+							//TODO: MAKE THIS BETTER
+							UbiquityClientApplication.this.close();
+						}
 					}
 					else {
+						//TODO: MAKE THIS BETTER
 						UbiquityClientApplication.this.close();
 					}
 				} catch (NoSuchAlgorithmException e) {
@@ -188,5 +218,8 @@ public class UbiquityClientApplication extends Application {
         mainWindow.setContent(layout);
 	}
 	
+    public String getPasswordHash() {
+    	return passwordHash;
+    }
 	
 }
