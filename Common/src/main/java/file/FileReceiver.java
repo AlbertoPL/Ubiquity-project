@@ -85,12 +85,12 @@ public class FileReceiver implements Runnable {
 					bos.flush();
 				}
 				bos.close();
-				if (localName.endsWith(".dex")) { //TODO: VERY naive, make better
+			/*	if (localName.endsWith(".dex")) { //TODO: VERY naive, make better
 					master.fileReceivedCallback(localName, new Message(MessageCode.INDEX, null));
 				}
 				else {
 					master.fileReceivedCallback(localName, new Message(MessageCode.CACHE, null));
-				}
+				}*/
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

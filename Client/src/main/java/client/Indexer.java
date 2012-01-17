@@ -325,8 +325,8 @@ public class Indexer implements Runnable {
 		
 		//enqueue the database file 
 		if (client.messageSender() != null) {
-			Message m = new Message(MessageCode.SENDING_INDEX, System.getProperty("derby.system.home") + File.separator + "dbexport.dex");
-			client.messageSender().enqueueMessage(m);
+	//		Message m = new Message(MessageCode.SENDING_INDEX, System.getProperty("derby.system.home") + File.separator + "dbexport.dex");
+		//	client.messageSender().enqueueMessage(m);
 		}
 	}
 	

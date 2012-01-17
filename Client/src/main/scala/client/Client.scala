@@ -1,15 +1,19 @@
 package client;
 
+import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.net.InetAddress
+import java.net.NetworkInterface
 import java.net.Socket
+import java.net.SocketException
 import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.Properties
+
+import client.Database
+import client.FileHandler
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPasswordField
@@ -19,7 +23,6 @@ import message.MessageReceiver
 import message.MessageSender
 import message.Messageable
 import util.BaseConversion
-import javax.swing.JComponent
 
 /**
  * A client implements a Messageable interface, which defines methods the
@@ -49,12 +52,19 @@ class Client extends Runnable with Messageable {
 
   var rootFolder: String = _
 
-  var indexer: Indexer = _
+ // var indexer: Indexer = _
+  var userid: Int = _
   var database: Database = _
   var receiver: MessageReceiver = _
   var running: Boolean = _
   var fileHandler: FileHandler = _
-  var fileMonitor: FileMonitor = _
+  //var fileMonitor: FileMonitor = _
+  //var serverFactory: FtpServerFactory = _
+  //var server: FtpServer = _
+  ///var listenerFactory: ListenerFactory = _
+  //var ssl: SslConfigurationFactory = _
+  //var userManagerFactory: PropertiesUserManagerFactory = _
+  //var connectionConfigFactory: ConnectionConfigFactory = _
 
   /**
    * Starts the indexer and the message handler on separate threads
@@ -64,12 +74,38 @@ class Client extends Runnable with Messageable {
     port = Integer.parseInt(defaults.getProperty("port"));
     host = defaults.getProperty("host");
 
-    indexer = new Indexer(this);
-    fileMonitor = new FileMonitor(this);
+   // indexer = new Indexer(this);
+   // fileMonitor = new FileMonitor(this);
     fileHandler = new FileHandler(this);
     database = new Database();
     loggedIn = false;
     connected = false;
+
+   // serverFactory = new FtpServerFactory();
+    
+    //connectionConfigFactory = new ConnectionConfigFactory();
+    //connectionConfigFactory.setAnonymousLoginEnabled(false);
+   // listenerFactory = new ListenerFactory();
+   // listenerFactory.setPort(21); //TODO: hardcoded for now
+   // listenerFactory.setServerAddress("localhost");
+    
+  //  ssl = new SslConfigurationFactory();
+    // ssl.setKeystoreFile(new File("src/main/resources/ftpserver.jks"));
+    // ssl.setKeystorePassword("password"); //TODO: all hardcoded...
+
+    //listenerFactory.setSslConfiguration(ssl.createSslConfiguration());
+    //listenerFactory.setImplicitSsl(false);
+
+  //  serverFactory.setConnectionConfig(connectionConfigFactory.createConnectionConfig());
+  //  serverFactory.addListener("default", listenerFactory.createListener());
+
+  //  userManagerFactory = new PropertiesUserManagerFactory();
+ //   serverFactory.setUserManager(new TestUserManagerFactory().createUserManager());
+
+  //  server = serverFactory.createServer();
+
+    // start the server
+  //  server.start();
   }
 
   //  TODO: make this in the WebUbiquity project if Alberto ever figures it out
@@ -107,24 +143,43 @@ class Client extends Runnable with Messageable {
       case MessageCode.DEVICE_NOT_SUPPORTED =>
         System.out.println("This device is not supported by the server!")
         connected = false
-      case MessageCode.SERVER_REQUEST_AUTH =>
+      case MessageCode.REQUEST_AUTH =>
         login
       //TODO: Handle the case where the algorithm check fails (it shouldn't!)
-      case MessageCode.SERVER_ACCEPT_AUTH =>
+      case MessageCode.ACCEPT_AUTH =>
         System.out.println("Successfully logged in!");
         loggedIn = true;
-      case MessageCode.SERVER_REJECT_AUTH =>
+      case MessageCode.REJECT_AUTH =>
         JOptionPane.showMessageDialog(null,
           "Username and/or password are incorrect!",
           "Authentication Failed", JOptionPane.ERROR_MESSAGE)
         login
       //TODO: Handle the case where the algorithm check fails (it shouldn't!)
-      case MessageCode.SERVER_BLOCK_AUTH =>
+      case MessageCode.BLOCK_AUTH =>
         JOptionPane.showMessageDialog(null,
           "Too many failed attempts to login! Please try again later.",
           "Account Locked", JOptionPane.ERROR_MESSAGE)
-      case MessageCode.INDEX_REQUEST => None
-      case MessageCode.FILE_REQUEST =>
+      case MessageCode.REQUEST_DIRECTORY =>
+        System.out.println("Directory listing requested for: " + message.getPayload());
+        var sb: StringBuilder = new StringBuilder();
+        if (message.getPayload().equalsIgnoreCase("root")) {
+          val roots:Array[File] = File.listRoots();
+          
+          for (i<-0 until roots.length) {
+        	//table.addItem(new Object[] {
+        		//    roots[i],roots[i].getTotalSpace() - roots[i].getFreeSpace(),roots[i].lastModified()}, new Integer(i+2));
+            System.out.println("Root[" + i + "] = " + roots(i))
+            sb.append(roots(i))
+            sb.append("\n")
+          }
+        }
+        else {
+          var root: File = new File(message.getPayload());
+          root.listFiles().foreach( f=>sb.append(f)) 
+        }
+        m = new Message(MessageCode.SEND_DIRECTORY, sb.toString())
+
+/*      case MessageCode.FILE_REQUEST =>
         m = new Message(MessageCode.SENDING_FILE, message.getPayload())
         messageSender.enqueueMessage(m)
       case MessageCode.SERVER_INDEX_REQUEST_ACK =>
@@ -144,9 +199,11 @@ class Client extends Runnable with Messageable {
         fileHandler.setFileToSendMetadata(m);
         fileHandler.setSending()
         t = new Thread(fileHandler)
-        t.start()
+        t.start()*/
       case MessageCode.REQUEST_NAME_AND_OS =>
-        m = new Message(MessageCode.NAME_AND_OS, osType + ":" + deviceName)
+        userid = Integer.parseInt(message.getPayload());
+        System.out.println(userid);
+        m = new Message(MessageCode.SEND_NAME_AND_OS, osType + ";" + deviceName + ";" + macAddress + ";" + userid)
         messageSender.enqueueMessage(m)
       case _ =>
         System.err.println("INVALID MESSAGE CODE DETECTED: " + message.getCode())
@@ -171,7 +228,7 @@ class Client extends Runnable with Messageable {
       var passwordHash =
         md.digest(String.valueOf(jpf.getPassword()).getBytes());
       System.out.println(BaseConversion.toHexString(passwordHash));
-      var m = new Message(MessageCode.CLIENT_SEND_AUTH, username + " " +
+      var m = new Message(MessageCode.SEND_AUTH, username + " " +
         BaseConversion.toHexString(passwordHash));
       messageSender.enqueueMessage(m);
     }
@@ -220,24 +277,24 @@ class Client extends Runnable with Messageable {
     running = true
 
     //start indexer TODO: set indexer to be run periodically
-    if (indexer != null) {
+    /*if (indexer != null) {
       var t = new Thread(indexer)
       if (!t.isAlive) {
         t = new Thread(indexer) //initialized twice at first, I know.
         t.start
         t.setPriority(Thread.MIN_PRIORITY)
       }
-    }
+    }*/
 
     //start file monitor TODO: find out how JNotify breaks when it does
-    if (fileMonitor != null) {
+    /*if (fileMonitor != null) {
       var tt = new Thread(fileMonitor)
       if (!tt.isAlive) {
         tt = new Thread(fileMonitor)
         tt.start
         tt.setPriority(Thread.MAX_PRIORITY)
       }
-    }
+    }*/
 
     while (running) {
       if (receiver != null) {
@@ -248,7 +305,7 @@ class Client extends Runnable with Messageable {
       }
 
       try {
-        Thread.sleep(1000 * 5)
+        Thread.sleep(100)
       } catch {
         case e: InterruptedException => e.printStackTrace
       }
@@ -273,5 +330,30 @@ class Client extends Runnable with Messageable {
   override def fileReceivedCallback(file: String, m: Message) {
     System.out.println("File received: " + file);
     //TODO: Potentially other actions like talk to a GUI or make a native call
+  }
+  
+  override def macAddress = {
+    var localMacAddress:String = ""
+    try {
+            var address: InetAddress = InetAddress.getLocalHost();
+
+            /*
+             * Get NetworkInterface for the current host and then read
+             * the hardware address.
+             */
+            var ni:NetworkInterface = 
+                    NetworkInterface.getByInetAddress(address);
+            if (ni != null) {
+                localMacAddress = ni.getHardwareAddress.toList.map(b => String.format("%02x",b.asInstanceOf[AnyRef])).mkString(":")     
+            }
+             else {
+                	println("Address doesn't exist or is not accessible.");
+                }
+        } 
+   catch {
+      case e: UnknownHostException => e.printStackTrace
+      case se: SocketException => se.printStackTrace
+   }
+    localMacAddress
   }
 }

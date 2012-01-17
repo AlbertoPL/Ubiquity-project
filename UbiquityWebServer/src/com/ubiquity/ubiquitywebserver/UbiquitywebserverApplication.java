@@ -2,6 +2,8 @@ package com.ubiquity.ubiquitywebserver;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Button;
@@ -20,6 +22,8 @@ public class UbiquitywebserverApplication extends Application {
 	private NewAccountPojoForm newAccountForm;
 	private LoginForm login;
 	private DatabaseAdapter database;
+	private int userid;
+	private List<String> devices;
 	
 	@Override
 	public void init() {
@@ -31,10 +35,11 @@ public class UbiquitywebserverApplication extends Application {
 	}
 	
 	private void showFileTable() {
+		mainWindow.addDeviceButtons(devices);
 		mainWindow.setContent();
 	}
 
-	public boolean login(String username, String passwordHash) {
+	public int login(String username, String passwordHash) {
 		return database.login(username, passwordHash);
 	}
 	
@@ -71,9 +76,11 @@ public class UbiquitywebserverApplication extends Application {
 					String name = event.getLoginParameter("username");
 					String passwordHash = BaseConversion.toHexString(md.digest(event.getLoginParameter("password").getBytes()));
 					
-					loggedIn = login(name,passwordHash);
-					if (loggedIn) {
+					int userId = login(name,passwordHash);
+					if (userId >= 0) {
 						setUser(name);
+						userid = userId;
+						loadDevices();
 						loggedIn = true;
 						showFileTable();
 					}
@@ -84,10 +91,18 @@ public class UbiquitywebserverApplication extends Application {
 					e.printStackTrace();
 				}
             }
+
+			private void loadDevices() {
+				devices = database.getDevices(userid);
+			}
         });
         layout.addComponent(login);
         layout.addComponent(newAccount);
         mainWindow.setContent(layout);
+	}
+	
+	public List<String> getDevices() {
+		return devices;
 	}
 
 }

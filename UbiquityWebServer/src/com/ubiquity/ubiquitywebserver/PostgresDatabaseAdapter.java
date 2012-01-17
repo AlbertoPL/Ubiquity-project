@@ -1,10 +1,14 @@
 package com.ubiquity.ubiquitywebserver;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 
@@ -23,10 +27,10 @@ class PostgresDatabaseAdapter implements DatabaseAdapter {
 	}
 
 	@Override
-	public boolean login(final String username, final String passwordHash) {
+	public int login(final String username, final String passwordHash) {
 
 		System.out.println("Logging user " + username + " in");
-		boolean result = false;
+		int id = -1;
 
 		Connection conn = null;
 		PreparedStatement login = null;
@@ -38,7 +42,8 @@ class PostgresDatabaseAdapter implements DatabaseAdapter {
 			e1.printStackTrace();
 		}
 
-		String loginString = "SELECT \"name\" FROM \"user\" WHERE \"name\" = ? AND \"password\" = ?";
+		String loginString = "SELECT \"userid\" FROM \"users\" WHERE \"username\" = ? " +
+			      "AND \"password\" = ?";
 
 		if (conn != null) {
 			try {
@@ -54,7 +59,7 @@ class PostgresDatabaseAdapter implements DatabaseAdapter {
 				ResultSet rs = login.executeQuery();
 				conn.commit();
 				if (rs.next()) {
-					result = true;
+					id = rs.getInt(1);
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -71,6 +76,36 @@ class PostgresDatabaseAdapter implements DatabaseAdapter {
 				e.printStackTrace();
 			}
 		}
-		return result;
+		return id;
+	}
+
+	@Override
+	public List<String> getDevices(int userid) {
+		Connection conn = null;
+		PreparedStatement getDevices = null;
+		List<String> devices = new ArrayList<String>();
+
+		try {
+			conn = DriverManager.getConnection("jdbc:postgresql:ubiquity",
+					props);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}		
+
+		CallableStatement getdevicesProc;
+		try {
+			getdevicesProc = conn.prepareCall("{ ? = call getdevices(?) }");
+			getdevicesProc.registerOutParameter(1, Types.OTHER);
+			getdevicesProc.setInt(2, userid);
+
+			getdevicesProc.execute();
+			Object table = getdevicesProc.getObject(1);
+			getdevicesProc.close();  
+			System.out.println(table.toString());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

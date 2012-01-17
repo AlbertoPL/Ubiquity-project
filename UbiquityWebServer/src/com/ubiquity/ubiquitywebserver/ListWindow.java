@@ -1,11 +1,20 @@
 package com.ubiquity.ubiquitywebserver;
 
-import com.vaadin.terminal.ExternalResource;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.List;
+
+import message.Message;
+import message.MessageCode;
+import remote.RmiServer;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Link;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -104,21 +113,38 @@ public class ListWindow extends Window {
 	private void initBody() {
 		body = new HorizontalLayout();
 		body.setSizeFull();
-		Button device = new Button("Your device");
-		device.addListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				ListWindow.this.getApplication().getMainWindow().open( new ExternalResource("http://" + ListWindow.this.getApplication().getUser() + ".testubiquity.info:8080/Ubiquity"));
-			}
-		});
-		body.addComponent(device);
 	}
 
 	private void initFooter() {
 		footer = new VerticalLayout();
 		footer.setSizeFull();
+		footer.addComponent(new Label("Copyright 2012 Ubiquity"));
 		//copyright info and such
+	}
+	
+	public void addDeviceButtons(List<String> devices) {
+		for (final String device: devices) {
+			Button deviceButton = new Button(device);
+			deviceButton.addListener(new Button.ClickListener() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+					Registry registry = null;
+					try {
+						registry = LocateRegistry.getRegistry("localhost");
+						RmiServer server = (RmiServer) registry.lookup("rmiServer");
+						server.sendMessageToClient((String) getApplication().getUser(),device,new Message(MessageCode.REQUEST_DIRECTORY, "root"));
+					} catch (RemoteException e) {
+					}
+					catch (NotBoundException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			body.addComponent(deviceButton);
+		}
 	}
 	
 	public void setContent() {

@@ -7,7 +7,7 @@ import java.io.InputStream
 import java.io.IOException
 
 object MessageReceiver {
-  val timeout = 3000
+  val timeout = 100
 
   def build(c: Messageable, i: InputStream) = {
     val mr = new MessageReceiver(c)

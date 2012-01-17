@@ -48,32 +48,39 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
     var m: Message = null //declared in case its needed
 
     if (!loggedIn) {
-      if (code == MessageCode.CLIENT_SEND_AUTH) {
+      if (code == MessageCode.SEND_AUTH) {
         var payload = message.getPayload
-        if (login(payload)) {
-          m = new Message(MessageCode.REQUEST_NAME_AND_OS, null)
+        var userid: Int = login(payload)
+        if (userid > 0) {
+          m = new Message(MessageCode.REQUEST_NAME_AND_OS, String.valueOf(userid))
           username = payload.substring(0, payload.indexOf(" "))
         } else {
           loginTries += 1
           if (loginTries >= ClientHandler.maxLoginTries) {
-            m = new Message(MessageCode.SERVER_BLOCK_AUTH, null)
+            m = new Message(MessageCode.BLOCK_AUTH, null)
           } else {
-            m = new Message(MessageCode.SERVER_REJECT_AUTH, null)
+            m = new Message(MessageCode.REJECT_AUTH, null)
           }
         }
         messageSender.enqueueMessage(m)
-      } else if (code == MessageCode.NAME_AND_OS) {
+      } else if (code == MessageCode.SEND_NAME_AND_OS) {
         var payload = message.getPayload
         System.out.println("PAYLOAD: " + payload)
-        var os = payload.substring(0, payload.indexOf(':')).trim
-        var name = payload.substring(payload.indexOf(':') + 1).trim
+        var os = payload.substring(0, payload.indexOf(';')).trim
+        payload = payload.substring(payload.indexOf(';') + 1);
+        var name = payload.substring(0, payload.indexOf(';')).trim
+        payload = payload.substring(payload.indexOf(';') + 1);
+        var macaddr = payload.substring(0, payload.indexOf(';')).trim
+        payload = payload.substring(payload.indexOf(';') + 1);
+        var userid = Integer.parseInt(payload);
         System.out.println("NAME: " + name)
         if (Server.validOsTypes.contains(os)) {
           deviceName = name
           osType = os
           loggedIn = true
           fileServer = new FileServer(this)
-          messageSender.enqueueMessage(new Message(MessageCode.SERVER_ACCEPT_AUTH, null))
+          messageSender.enqueueMessage(new Message(MessageCode.ACCEPT_AUTH, null))
+          insertDevice(deviceName, macaddr, userid)
         } else {
           Server.validOsTypes.foreach(println)
           System.err.println(os)
@@ -87,7 +94,7 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
         messageSender.enqueueMessage(m)
       }
     } else {
-      code match {
+   /*   code match {
         case MessageCode.INDEX_REQUEST =>
           t = new Thread(fileServer)
           t.start
@@ -98,7 +105,7 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
           t.start
           m = new Message(MessageCode.SERVER_FILE_REQUEST_ACK, String.valueOf(fileServer.getPort()) + " " + message.getPayload())
           messageSender.enqueueMessage(m)
-      }
+      }*/
     }
   }
 
@@ -126,7 +133,7 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
     receiver.start
 
     System.out.println("Request authentication")
-    var m = new Message(MessageCode.SERVER_REQUEST_AUTH, null)
+    var m = new Message(MessageCode.REQUEST_AUTH, null)
     messageSender.enqueueMessage(m)
 
     while (running) {
@@ -135,7 +142,7 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
         interpretCode(m)
       } else {
         try {
-          Thread.sleep(1000 * 3)
+          Thread.sleep(100)
         } catch {
           case e: InterruptedException => e.printStackTrace
         }
@@ -152,11 +159,11 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
     // TODO: Determine if this is an index file, if so, update the database
     //Otherwise, do whatever is necessary with the file such as sending it
     //to another datastore
-    m.getCode() match {
+    /*m.getCode() match {
       case MessageCode.INDEX => database.storeIndexInDatabase(username, file, deviceName)
       case MessageCode.CACHE => ()
       case MessageCode.BACKUP => ()
-    }
+    }*/
 
   }
 
@@ -176,4 +183,9 @@ class ClientHandler(var s: Socket) extends Runnable with Messageable {
   def setUsername(name: String) {
     username = name
   }
+  
+  def insertDevice(devicename: String, macaddr:String, userid:Int) =
+    database.insertDevice(devicename, macaddr, userid)
+  
+  override def macAddress = "Hi"
 }

@@ -70,4 +70,6 @@ trait Messageable {
   def rootFolder: String
 
   def osType: String
+  
+  def macAddress: String
 }

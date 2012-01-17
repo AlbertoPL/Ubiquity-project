@@ -7,6 +7,8 @@ import java.sql.DriverManager
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.PreparedStatement
+import java.sql.CallableStatement
+import java.sql.Types
 
 object PostgresDatabaseAdapter {
   val props = new Properties
@@ -25,7 +27,7 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
   override def login(username: String, passwordHash: String) = {
 
     println("Logging user " + username + " in");
-    var result = false;
+    var result:Int = 0;
 
     var conn: Connection = null;
     var login: PreparedStatement = null;
@@ -37,7 +39,7 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
       case e: SQLException => e.printStackTrace
     }
 
-    var loginString = "SELECT \"name\" FROM \"user\" WHERE \"name\" = ? " +
+    var loginString = "SELECT \"userid\" FROM \"users\" WHERE \"username\" = ? " +
       "AND \"password\" = ?"
 
     if (conn != null) {
@@ -54,7 +56,8 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
         var rs = login.executeQuery();
         conn.commit();
         if (rs.next()) {
-          result = true;
+          result = rs.getInt(1);
+          println("RESULT: " + result)
         }
       } catch {
         case sqle: SQLException => sqle.printStackTrace
@@ -257,7 +260,19 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
     var getString = "SELECT * FROM \"user\" WHERE \"name\" = ?"
     var getBetaString = "SELECT * FROM betasignup WHERE username = ?"
 
-    if (conn != null) {
+    var selectUserIdByUsernameProc: CallableStatement = conn.prepareCall("{ ? = call selectuseridbyusername( ? ) }");
+    selectUserIdByUsernameProc.registerOutParameter(1, Types.INTEGER);
+    selectUserIdByUsernameProc.setString(2, username);
+    selectUserIdByUsernameProc.execute();
+    var id: Int = selectUserIdByUsernameProc.getInt(1);
+    selectUserIdByUsernameProc.close();  
+    
+    if (id > 0) {
+      exists = true
+    }
+    exists  
+    
+    /*if (conn != null) {
       try {
         getUser = conn.prepareStatement(getString)
         conn.setAutoCommit(false)
@@ -320,7 +335,7 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
     } catch {
       case sqle: SQLException => sqle.printStackTrace
     }
-    exists
+    exists*/
   }
 
   override def betaSignup(username: String, email: String) = {
@@ -430,5 +445,30 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
       case sqle: SQLException => sqle.printStackTrace
     }
     size
+  }
+  
+  override def insertDevice(devicename: String, macaddr: String, userid: Int) = {
+    var conn: Connection = null
+    var getUser: PreparedStatement = null
+
+    try {
+      conn = DriverManager.getConnection("jdbc:postgresql:ubiquity",
+        PostgresDatabaseAdapter.props)
+    } catch {
+      case sqle: SQLException => sqle.printStackTrace
+    }
+
+    var insertdeviceProc: CallableStatement = conn.prepareCall("{ ? = call insertdevice( ?, ?, ?, ? ) }");
+    insertdeviceProc.registerOutParameter(1, Types.INTEGER);
+    insertdeviceProc.setString(2, devicename);
+    System.out.println(userid);
+    insertdeviceProc.setObject(3, macaddr, Types.OTHER);
+    insertdeviceProc.setObject(4, "0.0.0.0", Types.OTHER);
+    insertdeviceProc.setInt(5, userid);
+
+    insertdeviceProc.execute();
+    var id: Int = insertdeviceProc.getInt(1);
+    insertdeviceProc.close();  
+    
   }
 }

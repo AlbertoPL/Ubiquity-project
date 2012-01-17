@@ -9,7 +9,7 @@ import scala.actors.Actor
 import scala.actors.Actor._
 
 object MessageSender {
-  val timeout = 3000
+  val timeout = 100
 
   def build(c: Messageable, o: OutputStream) = {
     val ms = new MessageSender(c)
@@ -57,7 +57,7 @@ class MessageSender(c: Messageable) extends Actor {
             case ioe: IOException => ioe.printStackTrace
           }
         } //ok to send if we're asking for authentication or sending name and os, should move list elsewhere.
-        else if (m != null && (m.getCode() == MessageCode.SERVER_REQUEST_AUTH || m.getCode() == MessageCode.CLIENT_SEND_AUTH || m.getCode() == MessageCode.SERVER_ACCEPT_AUTH || m.getCode() == MessageCode.SERVER_REJECT_AUTH || m.getCode() == MessageCode.SERVER_BLOCK_AUTH || m.getCode() == MessageCode.REQUEST_NAME_AND_OS || m.getCode() == MessageCode.NAME_AND_OS || m.getCode() == MessageCode.DEVICE_NOT_SUPPORTED || m.getCode() == MessageCode.NOT_LOGGED_IN)) {
+        else if (m != null && (m.getCode() == MessageCode.REQUEST_AUTH || m.getCode() == MessageCode.ACCEPT_AUTH || m.getCode() == MessageCode.REJECT_AUTH || m.getCode() == MessageCode.BLOCK_AUTH || m.getCode() == MessageCode.REQUEST_NAME_AND_OS || m.getCode() == MessageCode.DEVICE_NOT_SUPPORTED || m.getCode() == MessageCode.NOT_LOGGED_IN)) {
           try {
             System.out.println("Sending message: " + m.getCode());
             out.writeObject(m);

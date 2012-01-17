@@ -8,10 +8,11 @@ trait DatabaseAdapter {
 
   def storeIndexInDatabase(username: String, filename: String,
     deviceName: String)
-  def login(username: String, passwordHash: String): Boolean
+  def login(username: String, passwordHash: String): Int
   def selectAllFilesFromUser(username: String): Vector[Array[String]]
   def userExists(username: String): Boolean
   def betaSignup(username: String, email: String): Boolean
   def getFileSize(username: String, filepath: String,
     deviceName: String): Long
+  def insertDevice(devicename: String, macaddr: String, userid: Int)
 }
