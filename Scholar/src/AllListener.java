@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 
@@ -132,11 +133,49 @@ public class AllListener implements ActionListener {
 				}
 			}
 		}
-		else if (command.equals("New Project")) {
-			
+		else if (command.equals("New Project") || command.equals("Close Project")) {
+			if (frame.isDirty()) {
+				int option = JOptionPane.showConfirmDialog(frame.getContentPane(), "Save current project?", "Unsaved changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				if (option == JOptionPane.NO_OPTION) {
+					Project project = new Project();
+					frame.setCurrentProject(project);
+					frame.clean();
+				}
+				else if (option == JOptionPane.YES_OPTION){
+					if (frame.getCurrentProject().getName().isEmpty()) {
+						int returnVal = fileChooser.showSaveDialog(frame.getContentPane());
+					    if (returnVal == JFileChooser.APPROVE_OPTION) {
+					        File file = fileChooser.getSelectedFile();
+					        try {
+								frame.getCurrentProject().saveProject(file.getName(), file.getCanonicalPath());
+								frame.setTitleString(file.getName());
+								frame.clean();
+					        } catch (IOException e) {
+								JOptionPane.showMessageDialog(frame.getContentPane(), "The current project could not be saved!", "Error saving project!", JOptionPane.ERROR_MESSAGE);
+								e.printStackTrace();
+							}
+					    }
+					}
+					else {
+						frame.getCurrentProject().saveProject(frame.getCurrentProject().getName(), frame.getCurrentProject().getSaveLocation());
+						frame.clean();
+					}
+					Project project = new Project();
+					frame.setCurrentProject(project);
+					frame.clean();
+				}
+			}
+			else {
+				Project project = new Project();
+				frame.setCurrentProject(project);
+				frame.clean();
+			}
 		}
-		else if (command.equals("Close Project")) {
-			
+		else if (command.equals("About")) {
+			JOptionPane.showMessageDialog(frame.getContentPane(), "Ubiquity Scholar © 2012 All rights reserved", "About Ubiquity Scholar", JOptionPane.INFORMATION_MESSAGE);
+		}
+		else if (command.equals("Hide")) {
+			frame.setExtendedState(JFrame.ICONIFIED);
 		}
 	}
 

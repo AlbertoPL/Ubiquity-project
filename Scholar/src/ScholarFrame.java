@@ -368,6 +368,9 @@ public class ScholarFrame extends JFrame {
 	}
 	
 	private void changeTitle() {
+		if (title.isEmpty()) {
+			title = "New Project";
+		}
 		setTitle("Ubiquity Scholar - " + title);
 		this.invalidate();
 		this.validate();
