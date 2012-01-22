@@ -74,7 +74,7 @@ public class ScholarFrame extends JFrame {
 	private JTextArea notes;
 	private JScrollPane notesScrollPane;
 
-	private String title = "New Project";
+	private String title = "";
 	private boolean dirty = false;
 	
 	private Project currentProject;
@@ -105,8 +105,8 @@ public class ScholarFrame extends JFrame {
 		
 	    initUI();
 	    initData();
+	    changeTitle();
 	    
-	    setDirty();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
 	}
@@ -348,30 +348,28 @@ public class ScholarFrame extends JFrame {
 	
 	public void clean() {
 		dirty = false;
-		title = title.substring(1);
 		changeTitle();
 	}
 	
 	private void setDirty() {
 		dirty = true;
-		title = "*" + title;
 		changeTitle();
 	}
 	
 	public void setTitleString(String title) {
-		if (isDirty()) {
-			this.title = "*" + title;
-		}
-		else {
-			this.title = title;
-		}
+		this.title = title;
 	}
 	
 	private void changeTitle() {
 		if (title.isEmpty()) {
 			title = "New Project";
 		}
-		setTitle("Ubiquity Scholar - " + title);
+		if (isDirty()) {
+			setTitle("Ubiquity Scholar - *" + title);
+		}
+		else {
+			setTitle("Ubiquity Scholar - " + title);
+		}
 		this.invalidate();
 		this.validate();
 	}

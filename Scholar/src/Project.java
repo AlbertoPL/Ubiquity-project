@@ -70,21 +70,29 @@ public class Project {
 	
 	public boolean saveProject(String name, String saveLocation) {
 		Gson gson = new Gson();
-		 
+		
+		String prevName = this.name;
+		String prevSaveLocation = this.saveLocation;
+		this.name = name;
+		this.saveLocation = saveLocation;
+		saved = true;
+		
 		// convert java object to JSON format,
 		// and returned as JSON formatted string
 		String json = gson.toJson(this);
 	 
 		try {
 			//write converted json data to a file
+			
 			FileWriter writer = new FileWriter(saveLocation + ".uprj");
 			writer.write(json);
 			writer.close();
-			this.name = name;
-			this.saveLocation = saveLocation;
-			saved = true;
+
 		} catch (IOException e) {
 			e.printStackTrace();
+			this.name = prevName;
+			this.saveLocation = prevSaveLocation;
+			saved = false;
 		}
 		
 		return saved;
