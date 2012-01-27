@@ -53,6 +53,15 @@ public class Project {
 				e1.printStackTrace();
 			}
 			e.printStackTrace();
+		} catch (Exception e) {
+			try {
+				JOptionPane.showMessageDialog(null, projectData.getCanonicalPath() + " is not a valid scholar project file!", "Not a valid project", JOptionPane.ERROR_MESSAGE);
+			} catch (HeadlessException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				JOptionPane.showMessageDialog(null, projectData.getAbsolutePath() + System.getProperty("file.separator") + projectData.getName() + " is not a valid scholar project file!", "Not a valid project", JOptionPane.ERROR_MESSAGE);
+				e1.printStackTrace();
+			}
 		}
 	}
 	

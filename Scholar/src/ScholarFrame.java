@@ -1,21 +1,16 @@
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -23,11 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 
 public class ScholarFrame extends JFrame {
@@ -49,12 +41,9 @@ public class ScholarFrame extends JFrame {
 	private JMenuItem about;
 	private JMenuItem hide;
 	
-	private DefaultListModel fileList;
-	private JList fileJList;
-	private JScrollPane fileScrollPane;
+	private ProjectsPanel projectPanel;
 	
-	@SuppressWarnings("unused")
-	private FileDrop fileDrop;
+	private FilesPanel filePanel;
 	
 	private JPanel buttonPanel;
 	private FlowLayout buttonLayout;
@@ -63,16 +52,13 @@ public class ScholarFrame extends JFrame {
 	private JButton openFile;
 	private JButton shareFile;
 	private JButton backupFile;
-	private ActionListener allListener;
-	
-	private JLabel fileDataText;
-	private String selectedFileName;
-	private String selectedFileSize;
-	private String selectedFileLocation;
-	private String selectedFileModified;
+	private FilePanelListener allListener;
 	
 	private JTextArea notes;
+	@SuppressWarnings("unused")
 	private JScrollPane notesScrollPane;
+	
+	private MainTabs tabs;
 
 	private String title = "";
 	private boolean dirty = false;
@@ -107,16 +93,55 @@ public class ScholarFrame extends JFrame {
 	    initData();
 	    changeTitle();
 	    
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener( new WindowAdapter()
+		{
+		    public void windowClosing(WindowEvent e)
+		    {
+		        ScholarFrame frame = (ScholarFrame)e.getSource();
+
+		        if (!frame.getCurrentProject().isSaved() || frame.isDirty()) {
+					int option = JOptionPane.showConfirmDialog(frame.getContentPane(), "Save project before exiting?", "Unsaved changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+					if (option == JOptionPane.NO_OPTION) {
+						System.exit(0);
+					}
+					else if (option == JOptionPane.YES_OPTION) {
+						if (frame.getCurrentProject().getName().isEmpty()) {
+							int returnVal = allListener.getFileChooser().showSaveDialog(frame.getContentPane());
+						    if (returnVal == JFileChooser.APPROVE_OPTION) {
+						        File file = allListener.getFileChooser().getSelectedFile();
+						        try {
+									frame.getCurrentProject().saveProject(file.getName(), file.getCanonicalPath());
+									frame.setTitle("Ubiquity Scholar - " + file.getName());
+									System.exit(0);
+						        } catch (IOException ioe) {
+									JOptionPane.showMessageDialog(frame.getContentPane(), "The current project could not be saved!", "Error saving project!", JOptionPane.ERROR_MESSAGE);
+									ioe.printStackTrace();
+								}
+						    }
+						}
+						else {
+							frame.getCurrentProject().saveProject(frame.getCurrentProject().getName(), frame.getCurrentProject().getSaveLocation());
+							System.exit(0);
+						}
+					}
+				}
+				else {
+					System.exit(0);
+				}
+
+		    }
+		});
 		this.setVisible(true);
 	}
 	
 	private void initUI() {
 		createMenu();
+		createProjectList();
 		createProjectFileList();
-		createButtonBar();
+		//createButtonBar();
 		createNotesArea();
-		createMetadata();
+		createTabs();
 	}
 	
 	private void initData() {
@@ -160,7 +185,7 @@ public class ScholarFrame extends JFrame {
 		options.add(hide);
 		help.add(about);
 		
-		allListener = new AllListener(this);
+		allListener = new FilePanelListener(this);
 		newProject.addActionListener(allListener);
 		openProject.addActionListener(allListener);
 		saveProject.addActionListener(allListener);
@@ -172,76 +197,19 @@ public class ScholarFrame extends JFrame {
 		this.setJMenuBar(menubar);
 	}
 	
-	private void createProjectFileList() {
-		fileList = new DefaultListModel();
-		fileJList = new JList(fileList);
-		fileJList.setVisibleRowCount(this.getHeight()/20);
-		Font displayFont = new Font("Serif", Font.BOLD, 12);
-		fileJList.setFont(displayFont);
-		fileScrollPane = new JScrollPane(fileJList);
-		
-		fileDrop = new FileDrop( System.out, fileScrollPane, new FileDrop.Listener() {   
-			public void filesDropped( java.io.File[] files ) {
-				for( int i = 0; i < files.length; i++ ) {   
-					try {
-						fileList.addElement(files[i].getCanonicalPath());
-						currentProject.addProjectFile(files[i].getCanonicalPath());
-						if (!isDirty()) {
-							setDirty();
-						}
-					}
-					catch( java.io.IOException e ) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		
-		fileJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		fileJList.addListSelectionListener(new ListSelectionListener() {
-
-			@Override
-			public void valueChanged(ListSelectionEvent arg0) {
-				int firstSelIx = fileJList.getSelectedIndex();
-				if (firstSelIx >= 0) {
-					removeFile.setEnabled(true);
-					openFile.setEnabled(true);
-					shareFile.setEnabled(true);
-					backupFile.setEnabled(true);
-					String filename = (String) fileList.get(firstSelIx);
-					File file = new File(filename);
-					selectedFileName = file.getName();
-					selectedFileLocation = file.getPath();
-					selectedFileSize = String.valueOf(file.getTotalSpace());
-					
-					Date lastmodified = new Date(file.lastModified());
-					DateFormat formatter =  new SimpleDateFormat("dd-MM-yyyy hh-MM-ss");
-					String formattedDate = formatter.format(lastmodified);
-					selectedFileModified = formattedDate;
-					String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified;
-					fileDataText.setText("<html><div style=\"text-align: left;\">" + text + "</html>");
-				}
-				else {
-					removeFile.setEnabled(false);
-					openFile.setEnabled(false);
-					shareFile.setEnabled(false);
-					backupFile.setEnabled(false);
-					selectedFileName = "";
-					selectedFileLocation = "";
-					selectedFileSize = "";
-					selectedFileModified = "";
-					String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified;
-					fileDataText.setText("<html><div style=\"text-align: left;\">" + text + "</html>");
-				}
-				ScholarFrame.this.invalidate();
-				ScholarFrame.this.validate();
-			}
-			
-		});
-		
-	    this.add(fileScrollPane, BorderLayout.WEST);
+	private void createProjectList() {
+		projectPanel = new ProjectsPanel();
+		this.add(projectPanel, BorderLayout.WEST);
 	}
 	
+	private void createProjectFileList() {
+		
+		filePanel = new FilesPanel(this);
+		
+	    this.add(filePanel, BorderLayout.EAST);
+	}
+	
+	@SuppressWarnings("unused")
 	private void createButtonBar() {
 		buttonPanel = new JPanel();
 		buttonLayout = new FlowLayout();
@@ -273,73 +241,93 @@ public class ScholarFrame extends JFrame {
 		buttonPanel.add(backupFile);
 		buttonPanel.add(shareFile);
 		
-		this.add(buttonPanel, BorderLayout.SOUTH);
+		this.add(buttonPanel, BorderLayout.NORTH);
 	}
 	
 	private void createNotesArea() {
 		notes = new JTextArea();
+		notes.setText("Loading open files...");
 		notes.setEditable(false);
 		notesScrollPane = new JScrollPane(notes);
+		/*try {
+	        String line;
+	        Process p = Runtime.getRuntime().exec
+	                (System.getenv("windir") +"\\system32\\"+"tasklist.exe /v /fo LIST /fi \" username eq " + System.getProperty("user.name") + "\"");
+	        BufferedReader input =
+	                new BufferedReader(new InputStreamReader(p.getInputStream()));
+	        String singleProcess = "";
+	        while ((line = input.readLine()) != null) {
+	            singleProcess += line + "\n";
+	            if (line.startsWith("Window Title:")) {
+	            	if (line.equals("Window Title: N/A")) {
+	            		singleProcess = "";
+	            	}
+	            	else {
+	            		notes.setText(notes.getText() + singleProcess); //<-- Parse data here
+	            		singleProcess = "";
+	            	}
+	            }
+	        	
+	        }
+	        input.close();
+	    } catch (Exception err) {
+	        err.printStackTrace();
+	    }*/
 		
-		this.add(notesScrollPane, BorderLayout.CENTER);
+		
+	       
+	       /* new Thread() {
+	        	public void run() {
+	        		try {
+	        		 String line;
+			        Process p = Runtime.getRuntime().exec
+			                (System.getenv("windir") +"\\system32\\"+"openfiles ");
+			        BufferedReader input =
+			                new BufferedReader(new InputStreamReader(p.getInputStream()));
+			        String setText = "";
+			        while ((line = input.readLine()) != null) {
+			            setText = setText + line + "\n"; //<-- Parse data here
+			        }
+			        input.close();
+			        notes.setText(setText);
+			        ScholarFrame.this.invalidate();
+			        ScholarFrame.this.validate();
+	        	}
+	        		catch (Exception err) {
+	        	        err.printStackTrace();
+	        	    }
+	        }
+	        }.start();*/
+	    
+		//this.add(notesScrollPane, BorderLayout.CENTER);
+		ScholarFrame.this.invalidate();
+        ScholarFrame.this.validate();
 	}
 	
-	private void createMetadata() {
-		selectedFileName = "";
-		selectedFileSize = "";
-		selectedFileLocation = "";
-		selectedFileModified = "";
-		String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified;
-		fileDataText = new JLabel("<html><div style=\"text-align: left;\">" + text + "</html>");
+	private void createTabs() {
+		tabs = new MainTabs();
 		
-		this.add(fileDataText, BorderLayout.EAST);
+		this.add(tabs, BorderLayout.CENTER);
 	}
 	
 	public BorderLayout getLayout() {
 		return layout;
 	}
-	
-	public void removeSelectedFile() {
-		fileList.remove(fileJList.getSelectedIndex());
-		fileJList.invalidate();
-		fileJList.validate();
-		setDirty();
-	}
-	
-	public void openSelectedFile() {
-		try {
-			Desktop.getDesktop().open( new File((String) fileList.get(fileJList.getSelectedIndex())) );
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
-	}
-	
-	public void openAllFiles() {
-		for (Object file: fileList.toArray()) {
-			if (file instanceof String) {
-				try {
-					Desktop.getDesktop().open( new File((String) file) );
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(this.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
+
 	public Project getCurrentProject() {
 		return currentProject;
 	}
 	
 	public void setCurrentProject(Project p) {
 		currentProject = p;
-		setTitleString(currentProject.getName());
-		fileList.removeAllElements();
-		for (String s: currentProject.getProjectFiles()) {
-			fileList.addElement(s);
+		if (currentProject != null && currentProject.getProjectFiles() != null) {
+			setTitleString(currentProject.getName());
+			filePanel.removeAllElements();
+			for (String s: currentProject.getProjectFiles()) {
+				filePanel.addElement(s);
+			}
+			changeTitle();
 		}
-		changeTitle();
 	}
 	
 	public boolean isDirty() {
@@ -351,7 +339,7 @@ public class ScholarFrame extends JFrame {
 		changeTitle();
 	}
 	
-	private void setDirty() {
+	public void setDirty() {
 		dirty = true;
 		changeTitle();
 	}
@@ -373,7 +361,15 @@ public class ScholarFrame extends JFrame {
 		this.invalidate();
 		this.validate();
 	}
-
+	
+	public FilesPanel getFilePanel() {
+		return filePanel;
+	}
+	
+	public MainTabs getTabs() {
+		return tabs;
+	}
+	
 	public static void main(String... args) {
 		new ScholarFrame();
 	}
