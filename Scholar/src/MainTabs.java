@@ -87,15 +87,15 @@ public class MainTabs extends JTabbedPane {
 	}
 	
 	private void checkOpenWindows() {
+		while (windowTableModel.getRowCount()>0){
+			windowTableModel.removeRow(0);
+		}
 		try {
 	        String line;
 	        Process p = Runtime.getRuntime().exec
 	                ("openwindow.exe");
 	        BufferedReader input =
 	                new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        for (int x = 0; x < windowTableModel.getRowCount(); ++x) {
-	        	windowTableModel.removeRow(x);
-	        }
 	        while ((line = input.readLine()) != null) {
 	            //String xy = line.substring(5, line.indexOf("Win Name:") - 1);
 	        	int x = Integer.parseInt(line.substring(0, line.indexOf(' ')));
