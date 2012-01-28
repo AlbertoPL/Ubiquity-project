@@ -1,7 +1,10 @@
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,9 +18,12 @@ public class MainTabs extends JTabbedPane {
 	private JPanel openWindows;
 	private JPanel fileInfo;
 	
+	
 	private WindowTableModel windowTableModel;
 	private JTable currentWindows;
 	private JScrollPane currentWindowsScrollPane;
+	
+	private JButton refreshOpenWindows;
 	
 	private String selectedFileName;
 	private String selectedFileSize;
@@ -43,28 +49,18 @@ public class MainTabs extends JTabbedPane {
 		currentWindowsScrollPane = new JScrollPane(currentWindows);
 		
 		openWindows.add(currentWindowsScrollPane, BorderLayout.CENTER);
-		try {
-        String line;
-        Process p = Runtime.getRuntime().exec
-                ("openwindow.exe");
-        BufferedReader input =
-                new BufferedReader(new InputStreamReader(p.getInputStream()));
-        while ((line = input.readLine()) != null) {
-            String xy = line.substring(5, line.indexOf("Win Name:") - 1);
-        	int x = Integer.parseInt(xy.substring(0, xy.indexOf(',')));
-        	int y = Integer.parseInt(xy.substring(xy.indexOf(',') + 1));
-            String name = line.substring(line.indexOf("Win Name:") + 10);
-        	if (x < 0 && y < 0) {
-        		xy = "Minimized";
-        	}
-        	windowTableModel.addRow(new String[]{name, xy, null});
-        }
-        input.close();
-        p.destroy();
-    } catch (Exception err) {
-        err.printStackTrace();
-    }
+		checkOpenWindows();
 		
+		refreshOpenWindows = new JButton("Refresh Windows");
+		refreshOpenWindows.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				checkOpenWindows();
+			}
+			
+		});
+		openWindows.add(refreshOpenWindows, BorderLayout.SOUTH);
 		
 		selectedFileName = "";
 		selectedFileSize = "";
@@ -73,6 +69,7 @@ public class MainTabs extends JTabbedPane {
 		String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified;
 		fileDataText = new JLabel("<html><div style=\"text-align: left;\">" + text + "</html>");
 		fileInfo.add(fileDataText);
+		
 		
 		this.addTab("Open Windows", openWindows);
 		this.addTab("Selected File", fileInfo);
@@ -89,4 +86,39 @@ public class MainTabs extends JTabbedPane {
 		this.setSelectedComponent(fileInfo);
 	}
 	
+	private void checkOpenWindows() {
+		try {
+	        String line;
+	        Process p = Runtime.getRuntime().exec
+	                ("openwindow.exe");
+	        BufferedReader input =
+	                new BufferedReader(new InputStreamReader(p.getInputStream()));
+	        for (int x = 0; x < windowTableModel.getRowCount(); ++x) {
+	        	windowTableModel.removeRow(x);
+	        }
+	        while ((line = input.readLine()) != null) {
+	            //String xy = line.substring(5, line.indexOf("Win Name:") - 1);
+	        	int x = Integer.parseInt(line.substring(0, line.indexOf(' ')));
+	        	line = line.substring(line.indexOf(' ') + 1);
+	        	int y = Integer.parseInt(line.substring(0 , line.indexOf(' ')));
+	        	line = line.substring(line.indexOf(' ') + 1);
+	        	int w = Integer.parseInt(line.substring(0, line.indexOf(' ')));
+	        	line = line.substring(line.indexOf(' ') + 1);
+	        	int h = Integer.parseInt(line.substring(0, line.indexOf(' ')));
+	        	line = line.substring(line.indexOf(' ') + 1);
+	            String name = line;
+	        	if (x < 0 && y < 0) {
+	        		line = "Minimized";
+	        	}
+	        	else {
+	        		line = x + "," + y;
+	        	}
+	        	windowTableModel.addRow(new String[]{name, line, w + "," + h, null});
+	        }
+	        input.close();
+	        p.destroy();
+	    } catch (Exception err) {
+	        err.printStackTrace();
+	    }
+	}
 }

@@ -12,6 +12,7 @@ public class WindowTableModel extends DefaultTableModel {
 	private void init() {
 		this.addColumn("Window Name");
 		this.addColumn("Window Position (X, Y)");
+		this.addColumn("Window Size");
 		this.addColumn("File");
 	}
 	
