@@ -11,24 +11,40 @@
 <link rel="stylesheet" href="@routes.Assets.at("stylesheets/main.css")"/>
 
 <script src="@routes.Assets.at("javascripts/lib/jquery/js/jquery-1.7.1.min.js")"></script>
-<script src="@routes.Assets.at("javascripts/lib/jquery/js/jquery-ui-1.8.17.min.js")"></script>
+<script src="@routes.Assets.at("javascripts/lib/jquery/js/jquery-ui-1.8.17.custom.min.js")"></script>
+<script src="@routes.Assets.at("javascripts/lib/underscore-min.js")"></script>
+<script src="@routes.Assets.at("javascripts/lib/backbone-min.js")"></script>
+
+<script src="@routes.Assets.at("javascripts/lib/bootstrap-dropdown.js")"></script>
+
+<script src="@routes.Assets.at("javascripts/user.js")"></script>
+
 @head
 </head>
 <body>
   <div class="topbar">
     <div class="fill">
       <div class="container">
-        <a class="brand" href="">Ubiquity</a>
+        <a class="brand" href="/">Ubiquity</a>
         <ul class="nav">
-          <li class="active"><a href="">Home</a></li>
-          <li><a href="files">My Files</a></li>
-          <li><a href="projects">My Projects</a></li>
+          <li class="active"><a href="/">Home</a></li>
+          <li><a href="/devices">My Devices</a></li>
+          <li><a href="/projects">My Projects</a></li>
         </ul>
-        <form action="" class="pull-right">
-          <input class="input-small" type="text" placeholder="Username"/>
-          <input class="input-small" type="password" placeholder="Password"/>
+        <form id="login" action="/login" class="pull-right">
+          <input class="username input-small" type="text" placeholder="Username"/>
+          <input class="password input-small" type="password" placeholder="Password"/>
           <button class="btn" type="submit" title="Log In">&raquo;</button>
         </form>
+        <ul id="user" class="nav secondary-nav">
+          <li class="dropdown" data-dropdown="dropdown">
+            <a class="username dropdown-toggle" href="#"></a>
+            <ul class="dropdown-menu">
+              <li><a href="/logoff">Log Off</a></li>
+              <li><a href="/settings">Settings</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
