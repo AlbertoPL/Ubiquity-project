@@ -2,6 +2,7 @@ $(function() {
   var User = Backbone.Model.extend({
     defaults: {
       username: 'Anonymous',
+      email: 'anon@ymo.us',
       loggedIn: false,
       joined: new Date
     },
@@ -18,14 +19,17 @@ $(function() {
   window['user'] = new User;
 
   $('form#login').on('submit', function(evt) {
-    //TODO: ajax login, spinner while deciding
     var login = $(this), userData = {
       username: login.find('.username').val(),
       loggedIn: true
     }, user = new User(userData);
+
+    login.find(':input').attr('disabled', 'disabled');
+
+    //TODO: use ajax; this would be the ajax success block
     login.hide();
     window['user'] = user;
-    $('ul#user').show().find('.username').text(user.get('username'));
+    $('ul#user').find('.username').text(user.get('username')).end().show();
     return false;
   });
 
