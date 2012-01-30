@@ -59,7 +59,7 @@ public class FilesPanel extends JPanel {
 				for( int i = 0; i < files.length; i++ ) {   
 					try {
 						fileList.addElement(files[i].getCanonicalPath());
-						parent.getCurrentProject().addProjectFile(files[i].getCanonicalPath());
+						parent.getCurrentProject().addProjectFile(files[i].getName(), files[i].getCanonicalPath());
 						if (!parent.isDirty()) {
 							parent.setDirty();
 						}
@@ -86,15 +86,21 @@ public class FilesPanel extends JPanel {
 					buttonPanel.setRemoveEnabled(true);
 					buttonPanel.setShareEnabled(true);
 					buttonPanel.setBackupEnabled(true);
-					String filename = (String) fileList.get(firstSelIx);
-					File file = new File(filename);
 					
-					Date lastmodified = new Date(file.lastModified());
+					String filename = (String) fileList.get(firstSelIx);
+					ProjectFile file = parent.getCurrentProject().getProjectFile(filename);
+					//File file = new File(filename);
+					
+					Date lastmodified = file.getFileModified();
 					DateFormat formatter =  new SimpleDateFormat("dd-MM-yyyy hh-MM-ss");
 					String formattedDate = formatter.format(lastmodified);
 					
-					parent.getTabs().setSelectedFileInfo(file.getName(), String.valueOf(file.getTotalSpace()), file.getPath(), formattedDate);
-					
+					if (fileJList.getSelectedIndices().length > 1) {
+						parent.getTabs().setSelectedFileInfo("Multiple files selected", "", "", "", false, false, "", "");
+					}
+					else {
+						parent.getTabs().setSelectedFileInfo(file.getFileName(), String.valueOf(file.getFileSize()), file.getFilePath(), formattedDate, true, file.isWindowAttached(), file.getWindowLeftPos() + "," + file.getWindowTopPos(), file.getWindowWidth() +"," + file.getWindowHeight());
+					}
 				}
 				else {
 					buttonPanel.setOpenText("Open All");
@@ -104,7 +110,7 @@ public class FilesPanel extends JPanel {
 					buttonPanel.setRemoveEnabled(false);
 					buttonPanel.setShareEnabled(false);
 					buttonPanel.setBackupEnabled(false);
-					parent.getTabs().setSelectedFileInfo("", "", "", "");
+					parent.getTabs().setSelectedFileInfo("", "", "", "", false, false, "", "");
 				}
 				parent.invalidate();
 				parent.validate();
@@ -121,8 +127,19 @@ public class FilesPanel extends JPanel {
 		this.add(buttonPanel);
 	}
 	
+	public DefaultListModel getListModel() {
+		return fileList;
+	}
+	
 	public void removeSelectedFile() {
+		parent.getCurrentProject().removeProjectFile((String) fileList.get(fileJList.getSelectedIndex()));
+		String file = (String) fileList.get(fileJList.getSelectedIndex());
 		fileList.remove(fileJList.getSelectedIndex());
+		for (int x = 0; x < parent.getTabs().getOpenWindows().getRowCount(); ++x) {
+			if (parent.getTabs().getOpenWindows().getValueAt(x, 3).equals(file)) {
+				parent.getTabs().getOpenWindows().setValueAt("", x, 3);
+			}
+		}
 		fileJList.invalidate();
 		fileJList.validate();
 		parent.setDirty();
@@ -131,7 +148,21 @@ public class FilesPanel extends JPanel {
 	public void openSelectedFile() {
 		for (Integer i: fileJList.getSelectedIndices()) {
 			try {
-				Desktop.getDesktop().open( new File((String) fileList.get(i)) );
+				boolean fileWindowOpened = false;
+				ProjectFile projectFile = parent.getCurrentProject().getProjectFile((String) fileList.get(i));
+				for (int x = 0; x < parent.getTabs().getOpenWindows().getRowCount(); ++x) {
+					String window = (String) parent.getTabs().getOpenWindows().getValueAt(x, 0);
+					if (window.equals(projectFile.getWindowName())) {
+						fileWindowOpened = true;
+						break;
+					}
+				}
+				if (!fileWindowOpened) {
+					Desktop.getDesktop().open( new File((String) fileList.get(i)) );
+				}
+				else {
+					JOptionPane.showMessageDialog(parent, "This file's window is already opened!", "File already opened!", JOptionPane.WARNING_MESSAGE);
+				}
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(parent.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
@@ -143,7 +174,18 @@ public class FilesPanel extends JPanel {
 		for (Object file: fileList.toArray()) {
 			if (file instanceof String) {
 				try {
-					Desktop.getDesktop().open( new File((String) file) );
+					boolean fileWindowOpened = false;
+					ProjectFile projectFile = parent.getCurrentProject().getProjectFile((String) file);
+					for (int x = 0; x < parent.getTabs().getOpenWindows().getRowCount(); ++x) {
+						String window = (String) parent.getTabs().getOpenWindows().getValueAt(x, 0);
+						if (window.equals(projectFile.getWindowName())) {
+							fileWindowOpened = true;
+							break;
+						}
+					}
+					if (!fileWindowOpened) {
+						Desktop.getDesktop().open( new File((String) file) );
+					}
 				} catch (IOException e) {
 					JOptionPane.showMessageDialog(parent.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
 					e.printStackTrace();

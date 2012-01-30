@@ -304,7 +304,7 @@ public class ScholarFrame extends JFrame {
 	}
 	
 	private void createTabs() {
-		tabs = new MainTabs();
+		tabs = new MainTabs(this);
 		
 		this.add(tabs, BorderLayout.CENTER);
 	}
@@ -322,8 +322,16 @@ public class ScholarFrame extends JFrame {
 		if (currentProject != null && currentProject.getProjectFiles() != null) {
 			setTitleString(currentProject.getName());
 			filePanel.removeAllElements();
-			for (String s: currentProject.getProjectFiles()) {
-				filePanel.addElement(s);
+			for (ProjectFile f: currentProject.getProjectFiles()) {
+				filePanel.addElement(f.getFilePath());
+				if (f.isWindowAttached()) {
+					for (int x = 0; x < tabs.getOpenWindows().getRowCount(); ++x) {
+						String windowname = (String) tabs.getOpenWindows().getValueAt(x, 0);
+						if (windowname.equals(f.getWindowName())) {
+							tabs.getOpenWindows().setValueAt(f.getFilePath(), x, 3);
+						}
+					}
+				}
 			}
 			changeTitle();
 		}

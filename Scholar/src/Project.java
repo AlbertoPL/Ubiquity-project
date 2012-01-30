@@ -16,12 +16,12 @@ public class Project {
 
 	private String name;
 	private String saveLocation;
-	private List<String> projectFiles;
+	private List<ProjectFile> projectFiles;
 	private boolean saved;
 	
 	//default blank
 	public Project() {
-		projectFiles = new ArrayList<String>();
+		projectFiles = new ArrayList<ProjectFile>();
 		saved = false;
 		name = "";
 		saveLocation = "";
@@ -65,16 +65,39 @@ public class Project {
 		}
 	}
 	
-	public void addProjectFile(String projectFile) {
+	public void addProjectFile(ProjectFile projectFile) {
 		projectFiles.add(projectFile);
 	}
 	
-	public List<String> getProjectFiles() {
+	public void addProjectFile(String filename, String filepath) {
+		ProjectFile file = new ProjectFile(filename, filepath);
+		projectFiles.add(file);
+	}
+	
+	public List<ProjectFile> getProjectFiles() {
 		return projectFiles;
 	}
 	
+	public ProjectFile getProjectFile(String filepath) {
+		for (ProjectFile f: projectFiles) {
+			if (f.getFilePath().equals(filepath)) {
+				return f;
+			}
+		}
+		return null;
+	}
+	
 	public void removeProjectFile(String projectFile) {
-		projectFiles.remove(projectFile);
+		ProjectFile fileToRemove = null;
+		for (ProjectFile f: projectFiles) {
+			if (f.getFilePath().equals(projectFile)) {
+				fileToRemove = f;
+				break;
+			}
+		}
+		if (fileToRemove != null) {
+			projectFiles.remove(fileToRemove);
+		}
 	}
 	
 	public boolean saveProject(String name, String saveLocation) {
