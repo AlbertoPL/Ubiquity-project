@@ -324,14 +324,6 @@ public class ScholarFrame extends JFrame {
 			filePanel.removeAllElements();
 			for (ProjectFile f: currentProject.getProjectFiles()) {
 				filePanel.addElement(f.getFilePath());
-				if (f.isWindowAttached()) {
-					for (int x = 0; x < tabs.getOpenWindows().getRowCount(); ++x) {
-						String windowname = (String) tabs.getOpenWindows().getValueAt(x, 0);
-						if (windowname.equals(f.getWindowName())) {
-							tabs.getOpenWindows().setValueAt(f.getFilePath(), x, 3);
-						}
-					}
-				}
 			}
 			changeTitle();
 		}

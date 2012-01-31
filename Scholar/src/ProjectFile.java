@@ -97,4 +97,12 @@ public class ProjectFile {
 	public void attachWindow() {
 		this.windowAttached = true;
 	}
+	
+	public void detachWindow() {
+		this.windowAttached = false;
+		windowHeight = -1;
+		windowWidth = -1;
+		windowLeftPos = -1;
+		windowTopPos = -1;
+	}
 }
