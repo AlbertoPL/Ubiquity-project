@@ -16,7 +16,7 @@ $(function() {
     }
   });
 
-  window['user'] = new User;
+  window['currentUser'] = new User;
 
   $('form#login').on('submit', function(evt) {
     var login = $(this), userData = {
@@ -32,8 +32,6 @@ $(function() {
     $('ul#user').find('.username').text(user.get('username')).end().show();
     return false;
   });
-
-  window['currentUser'] = new User;
 
   $('ul#user').dropdown();
 });
