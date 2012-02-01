@@ -166,7 +166,6 @@ public class FilesPanel extends JPanel {
 					BufferedReader input =
 			                new BufferedReader(new InputStreamReader(p.getInputStream()));
 			        while ((line = input.readLine()) != null) {
-			            //String xy = line.substring(5, line.indexOf("Win Name:") - 1);
 			        	line = line.substring(line.indexOf(' ') + 1);
 			        	line = line.substring(line.indexOf(' ') + 1);
 			        	line = line.substring(line.indexOf(' ') + 1);
@@ -213,7 +212,6 @@ public class FilesPanel extends JPanel {
 							BufferedReader input =
 					                new BufferedReader(new InputStreamReader(p.getInputStream()));
 					        while ((line = input.readLine()) != null) {
-					            //String xy = line.substring(5, line.indexOf("Win Name:") - 1);
 					        	line = line.substring(line.indexOf(' ') + 1);
 					        	line = line.substring(line.indexOf(' ') + 1);
 					        	line = line.substring(line.indexOf(' ') + 1);

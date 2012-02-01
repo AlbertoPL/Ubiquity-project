@@ -6,6 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -64,6 +66,10 @@ public class ScholarFrame extends JFrame {
 	
 	private Project currentProject;
 	
+	private Database database;
+	
+	private Map<String,String> projects;
+	
 	public ScholarFrame() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -87,7 +93,9 @@ public class ScholarFrame extends JFrame {
 	    int x = (dim.width-w)/2;
 	    int y = (dim.height-h)/2;
 	    this.setLocation(x, y);
-		
+
+	    //data MUST be initialized after UI or things wont be properly initialized to display
+	    //the data
 	    initUI();
 	    initData();
 	    changeTitle();
@@ -145,6 +153,20 @@ public class ScholarFrame extends JFrame {
 	
 	private void initData() {
 		currentProject = new Project();
+	    database = new Database();
+	    database.connectToDB();
+	    
+	    try {
+			projects = database.getProjects();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	    
+	    if (projects != null) {
+	    	for (String name: projects.keySet()) {
+	    		projectPanel.addElement(name);
+	    	}
+	    }
 	}
 	
 	private void createMenu() {
@@ -197,7 +219,7 @@ public class ScholarFrame extends JFrame {
 	}
 	
 	private void createProjectList() {
-		projectPanel = new ProjectsPanel();
+		projectPanel = new ProjectsPanel(this);
 		this.add(projectPanel, BorderLayout.WEST);
 	}
 	
@@ -365,8 +387,20 @@ public class ScholarFrame extends JFrame {
 		return filePanel;
 	}
 	
+	public ProjectsPanel getProjectPanel() {
+		return projectPanel;
+	}
+	
 	public MainTabs getTabs() {
 		return tabs;
+	}
+	
+	public Database getDatabase() {
+		return database;
+	}
+	
+	public String getProjectPath(String projectname) {
+		return projects.get(projectname);
 	}
 	
 	public static void main(String... args) {
