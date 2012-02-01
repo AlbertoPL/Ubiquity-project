@@ -12,13 +12,12 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -55,12 +54,13 @@ public class ScholarFrame extends JFrame {
 	private JButton backupFile;
 	private FilePanelListener allListener;
 	
-	private JTextArea notes;
-	@SuppressWarnings("unused")
-	private JScrollPane notesScrollPane;
-	
 	private MainTabs tabs;
 
+	private JPanel footer;
+	private JLabel onlineStatus;
+	
+	private boolean isConnected = false;
+	
 	private String title = "";
 	private boolean dirty = false;
 	
@@ -146,9 +146,8 @@ public class ScholarFrame extends JFrame {
 		createMenu();
 		createProjectList();
 		createProjectFileList();
-		//createButtonBar();
-		createNotesArea();
 		createTabs();
+		createFooter();
 	}
 	
 	private void initData() {
@@ -265,70 +264,18 @@ public class ScholarFrame extends JFrame {
 		this.add(buttonPanel, BorderLayout.NORTH);
 	}
 	
-	private void createNotesArea() {
-		notes = new JTextArea();
-		notes.setText("Loading open files...");
-		notes.setEditable(false);
-		notesScrollPane = new JScrollPane(notes);
-		/*try {
-	        String line;
-	        Process p = Runtime.getRuntime().exec
-	                (System.getenv("windir") +"\\system32\\"+"tasklist.exe /v /fo LIST /fi \" username eq " + System.getProperty("user.name") + "\"");
-	        BufferedReader input =
-	                new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        String singleProcess = "";
-	        while ((line = input.readLine()) != null) {
-	            singleProcess += line + "\n";
-	            if (line.startsWith("Window Title:")) {
-	            	if (line.equals("Window Title: N/A")) {
-	            		singleProcess = "";
-	            	}
-	            	else {
-	            		notes.setText(notes.getText() + singleProcess); //<-- Parse data here
-	            		singleProcess = "";
-	            	}
-	            }
-	        	
-	        }
-	        input.close();
-	    } catch (Exception err) {
-	        err.printStackTrace();
-	    }*/
-		
-		
-	       
-	       /* new Thread() {
-	        	public void run() {
-	        		try {
-	        		 String line;
-			        Process p = Runtime.getRuntime().exec
-			                (System.getenv("windir") +"\\system32\\"+"openfiles ");
-			        BufferedReader input =
-			                new BufferedReader(new InputStreamReader(p.getInputStream()));
-			        String setText = "";
-			        while ((line = input.readLine()) != null) {
-			            setText = setText + line + "\n"; //<-- Parse data here
-			        }
-			        input.close();
-			        notes.setText(setText);
-			        ScholarFrame.this.invalidate();
-			        ScholarFrame.this.validate();
-	        	}
-	        		catch (Exception err) {
-	        	        err.printStackTrace();
-	        	    }
-	        }
-	        }.start();*/
-	    
-		//this.add(notesScrollPane, BorderLayout.CENTER);
-		ScholarFrame.this.invalidate();
-        ScholarFrame.this.validate();
-	}
-	
 	private void createTabs() {
 		tabs = new MainTabs(this);
 		
 		this.add(tabs, BorderLayout.CENTER);
+	}
+	
+	private void createFooter() {
+		footer = new JPanel();
+		onlineStatus = new JLabel("Offline");
+		footer.add(onlineStatus);
+		
+		this.add(footer, BorderLayout.SOUTH);
 	}
 	
 	public BorderLayout getLayout() {

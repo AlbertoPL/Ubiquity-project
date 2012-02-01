@@ -158,6 +158,7 @@ public class FilesPanel extends JPanel {
 				int leftPos = pf.getWindowLeftPos();
 				int topPos = pf.getWindowTopPos();
 				
+				boolean executed = false;
 				String foundWindow = "";
 				do {
 					Process p = Runtime.getRuntime().exec
@@ -178,11 +179,14 @@ public class FilesPanel extends JPanel {
 			        }
 			        input.close();
 			        p.destroy();
+			        if (pf.isWindowAttached() && !foundWindow.isEmpty()) {
+						p = Runtime.getRuntime().exec
+				                ("openwindow.exe " + "\"" + windowName + "\"" + " " + leftPos + " " + topPos + " " + width + " " + height);
+						executed = true;
+			        }
 				}
-				while (foundWindow.isEmpty());
-				@SuppressWarnings("unused")
-				Process p = Runtime.getRuntime().exec
-		                ("openwindow.exe " + "\"" + windowName + "\"" + " " + leftPos + " " + topPos + " " + width + " " + height);
+				while (pf.isWindowAttached() && !executed);
+				
 			}
 			catch (IOException e) {
 				JOptionPane.showMessageDialog(parent.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
