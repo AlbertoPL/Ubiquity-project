@@ -28,10 +28,12 @@ $(function() {
 
     //TODO: use ajax; this would be the ajax success block
     login.hide();
-    window['user'] = user;
+    window['currentUser'] = user;
     $('ul#user').find('.username').text(user.get('username')).end().show();
     return false;
   });
+
+  window['currentUser'] = new User;
 
   $('ul#user').dropdown();
 });
