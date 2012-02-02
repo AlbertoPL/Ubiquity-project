@@ -16,7 +16,7 @@ $(function() {
     }
   });
 
-  window['user'] = new User;
+  window['currentUser'] = new User;
 
   $('form#login').on('submit', function(evt) {
     var login = $(this), userData = {
@@ -28,8 +28,9 @@ $(function() {
 
     //TODO: use ajax; this would be the ajax success block
     login.hide();
-    window['user'] = user;
-    $('ul#user').find('.username').text(user.get('username')).end().show();
+    window['currentUser'] = user;
+    $('ul#user').find('.username').text(user.get('username')).end()
+      .add('.login-required').css('display', 'block');
     return false;
   });
 

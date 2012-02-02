@@ -1,23 +1,21 @@
 @()
 
 @main("Devices") {
-<!-- TODO: head -->
+<script src="@routes.Assets.at("javascripts/models/devices.js")"></script>
+<script src="@routes.Assets.at("javascripts/views/device-list.js")"></script>
+<script src="@routes.Assets.at("javascripts/controllers/device-controller.js")"></script>
 } {
-<div class="hero-unit" data-role="header">
-  <h2>Your Devices</h2>
-  <p>Browse the contents of your connected devices.</p>
+<div class="page-header" data-role="header">
+  <h1>Your Devices 
+    <small>Browse the contents of your connected devices.</small>
+  </h1>
 </div>
-<div class="row">
+<div id="devices" class="row">
   <div class="span4">
-    <ul id="device-list" class="pills">
-      <li class="active"><a href="#">Home Desktop</a></li>
-      <li><a href="#">Work Desktop</a></li>
-      <li><a href="#">Work Laptop</a></li>
-      <li><a href="#">ARSTARSTARSTARSTARSTARSTARSTARSTARSTARSTARSTARST</a></li>
-    </ul>
+    <ul class="device-list pills"></ul>
   </div>
   <div class="span12">
-    <p></p>
+    <ul class="device-file-tree"></ul>
   </div>
 </div>
 }

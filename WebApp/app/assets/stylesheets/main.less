@@ -1,5 +1,18 @@
+body {
+    padding-top: 40px;
+}
+
 body, .topbar {
     min-width: 960px;
+}
+
+.login-required, ul.nav > li > a.login-required {
+    display: none;
+}
+
+.page-header {
+    padding: 20px 0 10px;
+    margin: 0 0 20px;
 }
 
 .container footer {
@@ -10,12 +23,26 @@ ul#user {
     display: none;
 }
 
-ul#device-list li {
-    text-align: center;
-    float: none;
-    a {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+#devices {
+    ul.device-list li {
+        text-align: center;
+        float: none;
+        a {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+    ul.device-file-tree {
+        list-style-type: none;
+        li {
+            &:nth-child(2n+1) {
+                background-color: #f5f5f5;
+            }
+            a {
+                display: block;
+                padding: 0.5em 1.5em;
+            }
+        }
     }
 }
