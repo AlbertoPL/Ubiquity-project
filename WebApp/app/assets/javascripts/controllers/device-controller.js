@@ -5,6 +5,7 @@ $(function() {
     },
 
     home: function() {
+      $('ul.nav li').removeClass('active').filter('.devices').addClass('active');
       var devices = new window.DeviceCollection([{
         id: 1,
         name: 'Home Desktop',

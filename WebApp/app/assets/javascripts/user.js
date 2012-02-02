@@ -29,7 +29,8 @@ $(function() {
     //TODO: use ajax; this would be the ajax success block
     login.hide();
     window['currentUser'] = user;
-    $('ul#user').find('.username').text(user.get('username')).end().show();
+    $('ul#user').find('.username').text(user.get('username')).end()
+      .add('.login-required').css('display', 'block');
     return false;
   });
 

@@ -1,3 +1,5 @@
 $(function() {
-  Backbone.history.start({pushState: true});
+  if(Backbone.history !== undefined) {
+    Backbone.history.start({pushState: true});
+  }
 });
