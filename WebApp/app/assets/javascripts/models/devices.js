@@ -2,6 +2,8 @@ $(function() {
   var File = Backbone.Model.extend({
     defaults: {
       name: 'File0',
+      size: '10MB',
+      owner: 'You',
       isDirectory: false,
       contents: null
     },

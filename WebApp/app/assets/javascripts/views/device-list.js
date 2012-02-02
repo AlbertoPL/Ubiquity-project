@@ -1,6 +1,6 @@
 (function($) {
   var deviceTemplate = _.template('<li data-id="<%= id %>"><a href="#"><%= name %></a></li>');
-  var fileTemplate = _.template('<li data-id="<%= id %>"><a href="#"><%= name %></a></li>');
+  var fileTemplate = _.template('<tr data-id="<%= id %>"><td><a href="#"><%= name %></a></td><td><%= size %></td><td><%= owner %></td></tr>');
   var breadcrumbTemplate = _.template('<li><a href="#"><%= name %></a> <span class="divider">/</span></li>');
 
   $.widget('ubiquity.deviceList', {
@@ -22,10 +22,9 @@
     _create: function() {
       this.deviceContainer = this.element.find('.device-list')
         .on('click', 'a', _.bind(this._changeDeviceHandler, this));
-      this.breadcrumb = this.element.find('.device-breadcrumb')
-        .hide()
-        .addClass('breadcrumb');
-      this.fileTreeContainer = this.element.find('.device-file-tree');
+      this.breadcrumb = this.element.find('.device-breadcrumb').hide();
+      this.fileTreeContainer = this.element.find('.device-files');
+      this.fileTreeBody = this.fileTreeContainer.find('tbody');
       this.deviceElements = {};
       this.activeDevice = null;
       this.refresh();
@@ -47,7 +46,7 @@
       this.deviceElements = {};
       this.activeDevice = null;
       this.deviceContainer.empty();
-      this.fileTreeContainer.empty();
+      this.fileTreeBody.empty();
     },
 
     refresh: function() {
@@ -94,21 +93,23 @@
 
     _renderTree: function() {
       var self = this;
-      this.fileTreeContainer.slideUp(function() {
+      this.fileTreeContainer.fadeOut(function() {
         self.breadcrumb.fadeOut(function() {
           $(breadcrumbTemplate({
             name: self.activeDevice.get('root')
           })).addClass('active').appendTo(self.breadcrumb.empty());
-          self.breadcrumb.fadeIn(function() {
-            self.fileTreeContainer.slideDown();
+          self.fileTreeBody.empty();
+          self.activeDevice.get('files').each(function(file) {
+            $(fileTemplate({
+              id: file.id,
+              name: file.get('name'),
+              size: file.get('size'),
+              owner: file.get('owner')
+            })).appendTo(self.fileTreeBody);
           });
-        });
-        self.fileTreeContainer.empty();
-        self.activeDevice.get('files').each(function(file) {
-          $(fileTemplate({
-            id: file.id,
-            name: file.get('name')
-          })).appendTo(self.fileTreeContainer);
+          self.breadcrumb.fadeIn('slow', function() {
+            self.fileTreeContainer.fadeIn('slow');
+          });
         });
       });
     }
