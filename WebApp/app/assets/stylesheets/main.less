@@ -1,5 +1,7 @@
-body {
-    padding-top: 60px;
+@media (min-width: 980px) {
+    body {
+        padding-top: 60px;
+    }
 }
 
 .login-required, ul.nav > li > a.login-required {
@@ -30,6 +32,8 @@ ul#user {
         }
     }
     ul.device-file-tree {
+        margin-left: 10px;
+        margin-right: 10px;
         list-style-type: none;
         li {
             &:nth-child(2n+1) {

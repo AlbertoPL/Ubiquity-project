@@ -30,6 +30,7 @@ $(function() {
   var Device = Backbone.Model.extend({
     defaults: {
       name: 'Device0',
+      root: '~',
       files: null
     },
 
