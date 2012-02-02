@@ -1,6 +1,6 @@
 (function($) {
   var deviceTemplate = _.template('<li data-id="<%= id %>"><a href="#"><%= name %></a></li>');
-  var fileTemplate = _.template('<li data-id="<%= deviceId %>"><a href="#"><%= name %></a></li>');
+  var fileTemplate = _.template('<li data-id="<%= id %>"><a href="#"><%= name %></a></li>');
 
   $.widget('ubiquity.deviceList', {
     options: {
@@ -89,7 +89,17 @@
     },
 
     _renderTree: function() {
-      
+      var self = this;
+      this.fileTreeContainer.slideUp(function() {
+        self.fileTreeContainer.children().remove();
+        self.activeDevice.get('files').each(function(file) {
+          $(fileTemplate({
+            id: file.id,
+            name: file.get('name')
+          })).appendTo(self.fileTreeContainer);
+        });
+        self.fileTreeContainer.slideDown();
+      });
     }
   });
 })(jQuery);
