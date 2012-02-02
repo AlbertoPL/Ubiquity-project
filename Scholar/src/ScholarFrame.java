@@ -6,17 +6,18 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -53,16 +54,21 @@ public class ScholarFrame extends JFrame {
 	private JButton backupFile;
 	private FilePanelListener allListener;
 	
-	private JTextArea notes;
-	@SuppressWarnings("unused")
-	private JScrollPane notesScrollPane;
-	
 	private MainTabs tabs;
 
+	private JPanel footer;
+	private JLabel onlineStatus;
+	
+	private boolean isConnected = false;
+	
 	private String title = "";
 	private boolean dirty = false;
 	
 	private Project currentProject;
+	
+	private Database database;
+	
+	private Map<String,String> projects;
 	
 	public ScholarFrame() {
 		try {
@@ -87,7 +93,9 @@ public class ScholarFrame extends JFrame {
 	    int x = (dim.width-w)/2;
 	    int y = (dim.height-h)/2;
 	    this.setLocation(x, y);
-		
+
+	    //data MUST be initialized after UI or things wont be properly initialized to display
+	    //the data
 	    initUI();
 	    initData();
 	    changeTitle();
@@ -138,13 +146,26 @@ public class ScholarFrame extends JFrame {
 		createMenu();
 		createProjectList();
 		createProjectFileList();
-		//createButtonBar();
-		createNotesArea();
 		createTabs();
+		createFooter();
 	}
 	
 	private void initData() {
 		currentProject = new Project();
+	    database = new Database();
+	    database.connectToDB();
+	    
+	    try {
+			projects = database.getProjects();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	    
+	    if (projects != null) {
+	    	for (String name: projects.keySet()) {
+	    		projectPanel.addElement(name);
+	    	}
+	    }
 	}
 	
 	private void createMenu() {
@@ -197,7 +218,7 @@ public class ScholarFrame extends JFrame {
 	}
 	
 	private void createProjectList() {
-		projectPanel = new ProjectsPanel();
+		projectPanel = new ProjectsPanel(this);
 		this.add(projectPanel, BorderLayout.WEST);
 	}
 	
@@ -243,70 +264,18 @@ public class ScholarFrame extends JFrame {
 		this.add(buttonPanel, BorderLayout.NORTH);
 	}
 	
-	private void createNotesArea() {
-		notes = new JTextArea();
-		notes.setText("Loading open files...");
-		notes.setEditable(false);
-		notesScrollPane = new JScrollPane(notes);
-		/*try {
-	        String line;
-	        Process p = Runtime.getRuntime().exec
-	                (System.getenv("windir") +"\\system32\\"+"tasklist.exe /v /fo LIST /fi \" username eq " + System.getProperty("user.name") + "\"");
-	        BufferedReader input =
-	                new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        String singleProcess = "";
-	        while ((line = input.readLine()) != null) {
-	            singleProcess += line + "\n";
-	            if (line.startsWith("Window Title:")) {
-	            	if (line.equals("Window Title: N/A")) {
-	            		singleProcess = "";
-	            	}
-	            	else {
-	            		notes.setText(notes.getText() + singleProcess); //<-- Parse data here
-	            		singleProcess = "";
-	            	}
-	            }
-	        	
-	        }
-	        input.close();
-	    } catch (Exception err) {
-	        err.printStackTrace();
-	    }*/
-		
-		
-	       
-	       /* new Thread() {
-	        	public void run() {
-	        		try {
-	        		 String line;
-			        Process p = Runtime.getRuntime().exec
-			                (System.getenv("windir") +"\\system32\\"+"openfiles ");
-			        BufferedReader input =
-			                new BufferedReader(new InputStreamReader(p.getInputStream()));
-			        String setText = "";
-			        while ((line = input.readLine()) != null) {
-			            setText = setText + line + "\n"; //<-- Parse data here
-			        }
-			        input.close();
-			        notes.setText(setText);
-			        ScholarFrame.this.invalidate();
-			        ScholarFrame.this.validate();
-	        	}
-	        		catch (Exception err) {
-	        	        err.printStackTrace();
-	        	    }
-	        }
-	        }.start();*/
-	    
-		//this.add(notesScrollPane, BorderLayout.CENTER);
-		ScholarFrame.this.invalidate();
-        ScholarFrame.this.validate();
-	}
-	
 	private void createTabs() {
-		tabs = new MainTabs();
+		tabs = new MainTabs(this);
 		
 		this.add(tabs, BorderLayout.CENTER);
+	}
+	
+	private void createFooter() {
+		footer = new JPanel();
+		onlineStatus = new JLabel("Offline");
+		footer.add(onlineStatus);
+		
+		this.add(footer, BorderLayout.SOUTH);
 	}
 	
 	public BorderLayout getLayout() {
@@ -322,8 +291,8 @@ public class ScholarFrame extends JFrame {
 		if (currentProject != null && currentProject.getProjectFiles() != null) {
 			setTitleString(currentProject.getName());
 			filePanel.removeAllElements();
-			for (String s: currentProject.getProjectFiles()) {
-				filePanel.addElement(s);
+			for (ProjectFile f: currentProject.getProjectFiles()) {
+				filePanel.addElement(f.getFilePath());
 			}
 			changeTitle();
 		}
@@ -365,8 +334,20 @@ public class ScholarFrame extends JFrame {
 		return filePanel;
 	}
 	
+	public ProjectsPanel getProjectPanel() {
+		return projectPanel;
+	}
+	
 	public MainTabs getTabs() {
 		return tabs;
+	}
+	
+	public Database getDatabase() {
+		return database;
+	}
+	
+	public String getProjectPath(String projectname) {
+		return projects.get(projectname);
 	}
 	
 	public static void main(String... args) {

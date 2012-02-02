@@ -1,124 +1,136 @@
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 
 
 @SuppressWarnings("serial")
 public class MainTabs extends JTabbedPane {
 
-	private JPanel openWindows;
 	private JPanel fileInfo;
-	
-	
-	private WindowTableModel windowTableModel;
-	private JTable currentWindows;
-	private JScrollPane currentWindowsScrollPane;
-	
-	private JButton refreshOpenWindows;
 	
 	private String selectedFileName;
 	private String selectedFileSize;
 	private String selectedFileLocation;
 	private String selectedFileModified;
 	private JLabel fileDataText;
-
 	
-	public MainTabs() {
+	private String windowPosition;
+	private String windowSize;
+	private JLabel windowDataText;
+	
+	private JButton attachWindow;
+	
+	private ScholarFrame parent;
+	
+	public MainTabs(ScholarFrame parent) {
 		super();
+		
+		this.parent = parent;
 		
 		init();
 	}
 	
 	private void init() {
-		openWindows = new JPanel();
-		openWindows.setLayout(new BorderLayout());
 		
 		fileInfo = new JPanel();
-		
-		windowTableModel = new WindowTableModel();
-		currentWindows = new JTable(windowTableModel);
-		currentWindowsScrollPane = new JScrollPane(currentWindows);
-		
-		openWindows.add(currentWindowsScrollPane, BorderLayout.CENTER);
-		checkOpenWindows();
-		
-		refreshOpenWindows = new JButton("Refresh Windows");
-		refreshOpenWindows.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				checkOpenWindows();
-			}
-			
-		});
-		openWindows.add(refreshOpenWindows, BorderLayout.SOUTH);
 		
 		selectedFileName = "";
 		selectedFileSize = "";
 		selectedFileLocation = "";
 		selectedFileModified = "";
-		String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified;
+		String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified + "<br/><br/><br/>";
 		fileDataText = new JLabel("<html><div style=\"text-align: left;\">" + text + "</html>");
 		fileInfo.add(fileDataText);
 		
+		String windowText = "Window Position: " + windowPosition + "<br/><br/>Window Size: " + windowSize;
+		windowDataText = new JLabel("<html><div style=\"text-align: left;\">" + windowText + "</html>");
+		windowDataText.setVisible(false);
+		fileInfo.add(windowDataText);
 		
-		this.addTab("Open Windows", openWindows);
+		attachWindow = new JButton("Attach Window");
+		attachWindow.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (attachWindow.getText().equals("Attach Window")) {
+					String selectedWindow = TableDialog.showDialog(
+                            parent,
+                            attachWindow,
+                            "Current Open Windows:",
+                            "Choose window");
+					if (!selectedWindow.isEmpty()) {
+						ProjectFile file = parent.getCurrentProject().getProjectFile(selectedFileLocation);
+						file.attachWindow();
+						file.setWindowName(selectedWindow.substring(0, selectedWindow.indexOf('\n')));
+						selectedWindow = selectedWindow.substring(selectedWindow.indexOf('\n') + 1);
+						setSelectedFileInfo(selectedFileName, selectedFileSize, selectedFileLocation, selectedFileModified, true, true, selectedWindow.substring(0, selectedWindow.indexOf('\n')), selectedWindow.substring(selectedWindow.indexOf('\n') + 1));
+						
+						int width = -1;
+						int height = -1;
+						int leftPos = -1;
+						int topPos = -1;
+						if (!selectedWindow.substring(0, selectedWindow.indexOf('\n')).equalsIgnoreCase("minimized")) {
+							leftPos = Integer.parseInt(selectedWindow.substring(0, selectedWindow.indexOf(',')));
+							topPos = Integer.parseInt(selectedWindow.substring(selectedWindow.indexOf(',') + 1, selectedWindow.indexOf('\n')));
+							selectedWindow = selectedWindow.substring(selectedWindow.indexOf('\n') + 1);
+							width = Integer.parseInt(selectedWindow.substring(0, selectedWindow.indexOf(',')));
+							height = Integer.parseInt(selectedWindow.substring(selectedWindow.indexOf(',') + 1));
+						}
+						else {
+							selectedWindow = selectedWindow.substring(selectedWindow.indexOf('\n') + 1);
+							width = Integer.parseInt(selectedWindow.substring(0, selectedWindow.indexOf(',')));
+							height = Integer.parseInt(selectedWindow.substring(selectedWindow.indexOf(',') + 1));
+						}
+						file.setWindowSettings(height, width, leftPos, topPos);
+
+						MainTabs.this.invalidate();
+						MainTabs.this.validate();
+						MainTabs.this.parent.setDirty();
+					}
+				}
+				else {
+					setSelectedFileInfo(selectedFileName, selectedFileSize, selectedFileLocation, selectedFileModified, true, false, "", "");
+					MainTabs.this.parent.getCurrentProject().getProjectFile(selectedFileLocation).detachWindow();
+					MainTabs.this.parent.setDirty();
+				}
+			}
+			
+		});
+		attachWindow.setEnabled(false);
+		fileInfo.add(attachWindow);
+
 		this.addTab("Selected File", fileInfo);
 	}
 	
-	public void setSelectedFileInfo(String filename, String filesize, String filelocation, String filemodified) {
+	public void setSelectedFileInfo(String filename, String filesize, String filelocation, String filemodified, boolean windowAttachedEnabled, boolean windowAttached, String windowPosition, String windowSize) {
 		this.selectedFileName = filename;
 		this.selectedFileSize = filesize;
 		this.selectedFileLocation = filelocation;
 		this.selectedFileModified = filemodified;
-		String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified;
+		String text = "File Name: " + selectedFileName + "<br/><br/>File Size: " + selectedFileSize + " bytes<br/><br/>File Location: " + selectedFileLocation + "<br/><br/>Last Modified By: " + selectedFileModified + "<br/><br/><br/>";
 		fileDataText.setText("<html><div style=\"text-align: left;\">" + text + "</html>");
 		
-		this.setSelectedComponent(fileInfo);
-	}
-	
-	private void checkOpenWindows() {
-		while (windowTableModel.getRowCount()>0){
-			windowTableModel.removeRow(0);
+		this.windowPosition = windowPosition;
+		this.windowSize = windowSize;
+		String windowText = "Window Position: " + windowPosition + "<br/><br/>Window Size: " + windowSize;
+		windowDataText.setText("<html><div style=\"text-align: left;\">" + windowText + "</html>");
+		
+		if (windowAttached) {
+			windowDataText.setVisible(true);
+			attachWindow.setVisible(true);
+			attachWindow.setEnabled(true);
+			attachWindow.setText("Detach Window");
 		}
-		try {
-	        String line;
-	        Process p = Runtime.getRuntime().exec
-	                ("openwindow.exe");
-	        BufferedReader input =
-	                new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        while ((line = input.readLine()) != null) {
-	            //String xy = line.substring(5, line.indexOf("Win Name:") - 1);
-	        	int x = Integer.parseInt(line.substring(0, line.indexOf(' ')));
-	        	line = line.substring(line.indexOf(' ') + 1);
-	        	int y = Integer.parseInt(line.substring(0 , line.indexOf(' ')));
-	        	line = line.substring(line.indexOf(' ') + 1);
-	        	int w = Integer.parseInt(line.substring(0, line.indexOf(' ')));
-	        	line = line.substring(line.indexOf(' ') + 1);
-	        	int h = Integer.parseInt(line.substring(0, line.indexOf(' ')));
-	        	line = line.substring(line.indexOf(' ') + 1);
-	            String name = line;
-	        	if (x < 0 && y < 0) {
-	        		line = "Minimized";
-	        	}
-	        	else {
-	        		line = x + "," + y;
-	        	}
-	        	windowTableModel.addRow(new String[]{name, line, w + "," + h, null});
-	        }
-	        input.close();
-	        p.destroy();
-	    } catch (Exception err) {
-	        err.printStackTrace();
-	    }
+		else {
+			attachWindow.setEnabled(windowAttachedEnabled);
+			attachWindow.setText("Attach Window");
+			windowDataText.setVisible(false);
+		}
+		
+		this.setSelectedComponent(fileInfo);
 	}
 }

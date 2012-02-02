@@ -2,6 +2,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -91,8 +92,12 @@ public class FilePanelListener implements ActionListener {
 								frame.getCurrentProject().saveProject(file.getName(), file.getCanonicalPath());
 								frame.setTitleString(file.getName());
 								frame.clean();
+								frame.getDatabase().saveProject(file.getName(), file.getCanonicalPath());
+								frame.getProjectPanel().addElement(file.getName());
 					        } catch (IOException e) {
 								JOptionPane.showMessageDialog(frame.getContentPane(), "The current project could not be saved!", "Error saving project!", JOptionPane.ERROR_MESSAGE);
+								e.printStackTrace();
+							} catch (SQLException e) {
 								e.printStackTrace();
 							}
 					    }
@@ -121,8 +126,12 @@ public class FilePanelListener implements ActionListener {
 							frame.getCurrentProject().saveProject(file.getName(), file.getCanonicalPath());
 							frame.setTitleString(file.getName());
 							frame.clean();
+							frame.getDatabase().saveProject(file.getName(), file.getCanonicalPath());
+							frame.getProjectPanel().addElement(file.getName());
 				        } catch (IOException e) {
 							JOptionPane.showMessageDialog(frame.getContentPane(), "The current project could not be saved!", "Error saving project!", JOptionPane.ERROR_MESSAGE);
+							e.printStackTrace();
+						} catch (SQLException e) {
 							e.printStackTrace();
 						}
 				    }
