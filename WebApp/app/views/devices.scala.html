@@ -2,21 +2,20 @@
 
 @main("Devices") {
 <script src="@routes.Assets.at("javascripts/models/devices.js")"></script>
+<script src="@routes.Assets.at("javascripts/views/device-list.js")"></script>
+<script src="@routes.Assets.at("javascripts/controllers/device-controller.js")"></script>
 } {
 <div class="page-header" data-role="header">
   <h1>Your Devices 
     <small>Browse the contents of your connected devices.</small>
   </h1>
 </div>
-<div class="row">
+<div id="devices" class="row">
   <div class="span4">
-    <ul id="device-list" class="pills">
-      <li data-id="1" class="active"><a href="#">Home Desktop</a></li>
-      <li data-id="2"><a href="#">Work Desktop</a></li>
-      <li data-id="3"><a href="#">Work Laptop</a></li>
-      <li data-id="4"><a href="#"">ARSTARSTARSTARSTARST</a></li>
-    </ul>
+    <ul class="device-list pills"></ul>
   </div>
-  <div id="device-file-tree" class="span12"></div>
+  <div class="span12">
+    <ul class="device-file-tree"></ul>
+  </div>
 </div>
 }

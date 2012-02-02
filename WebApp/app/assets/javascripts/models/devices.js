@@ -52,4 +52,6 @@ $(function() {
       '/' + window['currentUser'].get('username') + '/devices.json'
     }
   });
+
+  window['DeviceCollection'] = DeviceCollection;
 });
