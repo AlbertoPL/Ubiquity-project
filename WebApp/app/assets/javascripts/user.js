@@ -34,5 +34,5 @@ $(function() {
     return false;
   });
 
-  $('ul#user').dropdown();
+  $('ul#user a.dropdown-toggle').dropdown();
 });
