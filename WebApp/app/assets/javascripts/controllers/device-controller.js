@@ -13,7 +13,11 @@ $(function() {
       }, {
         id: 2,
         name: 'Work Laptop',
-        files: [{id: 4, name: 'd'}, {id: 5, name: 'e'}, {id: 6, name: 'f'}]
+        files: [
+          {id: 4, name: 'd'}, 
+          {id: 5, name: 'e'}, 
+          {id: 6, name: 'f', isDirectory: true, children: [{id: 7, name: 'g'}, {id: 8, name: 'h'}]}
+        ]
       }]);
 
       $('#devices').deviceList({

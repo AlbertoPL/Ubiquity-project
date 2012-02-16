@@ -5,18 +5,18 @@ $(function() {
       size: '10MB',
       owner: 'You',
       isDirectory: false,
-      contents: null
+      children: null
     },
 
     initialize: function() {
-      var contents = this.get('contents');
-      if(_.isArray(contents)) {
-        contents = new FileCollection(contents);
+      var children = this.get('children');
+      if(_.isArray(children)) {
+        children = new FileCollection(children);
       } else {
-        contents = new FileCollection;
+        children = new FileCollection;
       }
       this.set({
-        contents: contents
+        children: children
       });
     },
     
