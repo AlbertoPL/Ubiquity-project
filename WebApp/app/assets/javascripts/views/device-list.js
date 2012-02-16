@@ -1,6 +1,6 @@
 (function($) {
   var deviceTemplate = _.template('<li data-id="<%= id %>"><a href="#"><%= name %></a></li>');
-  var fileTemplate = _.template('<tr data-id="<%= id %>"><td clasr="name"><a href="#"><%= name %></a></td><td class="size"><%= size %></td><td class="owner"><%= owner %></td></tr>');
+  var fileTemplate = _.template('<tr data-id="<%= id %>"><td class="name"><a href="#"><%= name %></a></td><td class="size"><%= size %></td><td class="owner"><%= owner %></td></tr>');
   var breadcrumbTemplate = _.template('<li><a href="#"><%= name %></a> <span class="divider">/</span></li>');
 
   $.widget('ubiquity.deviceList', {
