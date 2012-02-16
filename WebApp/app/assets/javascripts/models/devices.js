@@ -1,7 +1,7 @@
 $(function() {
   var File = Backbone.Model.extend({
     defaults: {
-      name: 'File0',
+      name: '~',
       size: '10MB',
       owner: 'You',
       isDirectory: false,
@@ -32,19 +32,18 @@ $(function() {
   var Device = Backbone.Model.extend({
     defaults: {
       name: 'Device0',
-      root: '~',
-      files: null
+      root: null
     },
 
     initialize: function() {
-      var files = this.get('files');
-      if(_.isArray(files)) {
-        files = new FileCollection(files);
+      var root = this.get('root');
+      if(_.isObject(root)) {
+        root = new File(root);
       } else {
-        files = new FileCollection;
+        root = new File;
       }
       this.set({
-        files: files
+        root: root
       });
     }
   });
