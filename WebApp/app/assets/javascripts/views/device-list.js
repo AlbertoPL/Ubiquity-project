@@ -135,6 +135,7 @@
     },
 
     _fileOpenHandler: function(evt) {
+      //TODO figure out why this method fires twice
       var target = $(evt.target), currentDir = null, selectedFile = null;
       if(target.closest('tr').hasClass('directory')) {
         currentDir = _.last(this.deviceFileCollectionStack[this.activeDevice.id]);
