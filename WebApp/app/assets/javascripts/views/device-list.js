@@ -1,6 +1,13 @@
 (function($) {
   var deviceTemplate = _.template('<li data-id="<%= id %>"><a href="#"><%= name %></a></li>');
-  var fileTemplate = _.template('<tr data-id="<%= id %>"><td class="name"><a href="#"><%= name %></a></td><td class="size"><%= size %></td><td class="owner"><%= owner %></td></tr>');
+  var fileTemplate = _.template('<tr data-id="<%= id %>">' + 
+    '<td class="name span4"><a href="#"><%= name %></a></td>' + 
+    '<td class="size span2"><%= size %></td>' + 
+    '<td class="owner span2"><%= owner %></td>' + 
+    '<td class="projects span1"><div class="btn-group pull-right">' + 
+      '<a href="#" class="btn dropdown-toggle" data-toggle="dropdown">Projects <span class="caret"></span></a>' + 
+      '<ul class="dropdown-menu"><li><a href="#">Foo</a></li></ul></div></td></tr>');
+  var projectAssociationTemplate = _.template('<li><a href="#"><%= name %></a></li>');
   var breadcrumbTemplate = _.template('<li><a href="#"><%= name %></a><span class="divider">/</span></li>');
 
   $.widget('ubiquity.deviceList', {
@@ -96,7 +103,7 @@
 
     _stopListening: function() {
       this.breadcrumb.off('click', 'a');
-      this.fileTreeContainer.off('click', 'a');
+      this.fileTreeContainer.off('click', '.name a');
     },
 
     _renderTree: function() {
@@ -109,7 +116,7 @@
           self.breadcrumb.fadeIn('fast', function() {
             self.fileTreeContainer.fadeIn('fast');
           });
-          self.fileTreeContainer.on('click', 'a', _.bind(self._fileOpenHandler, self));
+          self.fileTreeContainer.on('click', '.name a', _.bind(self._fileOpenHandler, self));
         });
       });
     },
