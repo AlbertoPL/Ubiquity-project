@@ -94,8 +94,14 @@
       }
     },
 
+    _stopListening: function() {
+      this.breadcrumb.off('click', 'a:not(.active)');
+      this.fileTreeContainer.off('click', 'a');
+    },
+
     _renderTree: function() {
       var self = this;
+      this._stopListening();
       this.fileTreeContainer.fadeOut('fast', function() {
         self.breadcrumb.fadeOut('fast', function() {
           self._renderBreadcrumb();
@@ -115,6 +121,7 @@
         $(breadcrumbTemplate({name: directory.get('name')})).appendTo(self.breadcrumb);
       });
       this.breadcrumb.find('li:last').addClass('active');
+      this.breadcrumb.on('click', 'a:not(.active)', _.bind(this._goUpDirectory, this));
     },
 
     _renderFiles: function() {
@@ -135,18 +142,21 @@
     },
 
     _fileOpenHandler: function(evt) {
-      //TODO figure out why this method fires twice
       var target = $(evt.target), currentDir = null, selectedFile = null;
       if(target.closest('tr').hasClass('directory')) {
         currentDir = _.last(this.deviceFileCollectionStack[this.activeDevice.id]);
         selectedFile = currentDir.get('children').find(function(directory) {
           return directory.get('name') === $.trim(target.text());
         });
-        if(typeof selectedFile !== 'undefined') {
-          this.deviceFileCollectionStack[this.activeDevice.id].push(selectedFile);
-          this._renderTree();
-        }
+        this.deviceFileCollectionStack[this.activeDevice.id].push(selectedFile);
+        this._renderTree();
       }
+      return false;
+    },
+
+    _goUpDirectory: function(evt) {
+      var targetLink = $(evt.target);
+      console.log(targetLink.text());
       return false;
     }
   });
