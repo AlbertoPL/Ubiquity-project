@@ -95,7 +95,7 @@
     },
 
     _stopListening: function() {
-      this.breadcrumb.off('click', 'a:not(.active)');
+      this.breadcrumb.off('click', 'a');
       this.fileTreeContainer.off('click', 'a');
     },
 
@@ -121,7 +121,7 @@
         $(breadcrumbTemplate({name: directory.get('name')})).appendTo(self.breadcrumb);
       });
       this.breadcrumb.find('li:last').addClass('active');
-      this.breadcrumb.on('click', 'a:not(.active)', _.bind(this._goUpDirectory, this));
+      this.breadcrumb.on('click', 'a', _.bind(this._goUpDirectory, this));
     },
 
     _renderFiles: function() {
@@ -155,8 +155,11 @@
     },
 
     _goUpDirectory: function(evt) {
-      var targetLink = $(evt.target);
-      console.log(targetLink.text());
+      var targetText = $.trim($(evt.target).text()), 
+        activeStack = this.deviceFileCollectionStack[this.activeDevice.id];
+      console.log(targetText);
+      while(_.last(activeStack).get('name') !== targetText) activeStack.pop();
+      this._renderTree();
       return false;
     }
   });
