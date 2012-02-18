@@ -12,4 +12,8 @@ object Application extends Controller {
   def devices = Action {
     Ok(views.html.devices())
   }
+
+  def projects = Action {
+  	Ok(views.html.projects())
+  }
 }

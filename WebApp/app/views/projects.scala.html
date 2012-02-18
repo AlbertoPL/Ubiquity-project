@@ -1,0 +1,30 @@
+@()
+
+@main("Projects") {
+<script src="@routes.Assets.at("javascripts/models/files.js")"></script>
+<script src="@routes.Assets.at("javascripts/models/projects.js")"></script>
+<script src="@routes.Assets.at("javascripts/views/project-list.js")"></script>
+<script src="@routes.Assets.at("javascripts/controllers/project-controller.js")"></script>
+} {
+<div class="page-header" data-role="header">
+  <h1>Your Projects 
+    <small>Manage your projects.</small>
+  </h1>
+</div>
+<div id="projects" class="row">
+  <div class="span3">
+    <ul class="project-list nav nav-stacked nav-pills"></ul>
+  </div>
+  <div class="span9">
+    <table class="project-files table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Owner</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+}
