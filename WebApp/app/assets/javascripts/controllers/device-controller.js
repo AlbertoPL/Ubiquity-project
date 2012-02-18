@@ -9,7 +9,7 @@ $(function() {
       var devices = new window.DeviceCollection([{
         id: 1,
         name: 'Home Desktop',
-        root: {id: 100, isDirectory:true, children: [{id: 1, name: 'a'}, {id: 2, name: 'b'}, {id: 3, name: 'c'}]}
+        root: {id: 100, isDirectory:true, children: [{id: 1, name: 'a', projects: ['foo', 'bar']}, {id: 2, name: 'b'}, {id: 3, name: 'c'}]}
       }, {
         id: 2,
         name: 'Work Laptop',
@@ -17,7 +17,7 @@ $(function() {
           id: 101, 
           isDirectory: true, 
           children: [
-            {id: 4, name: 'd'}, 
+            {id: 4, name: 'd', projects: ['foo', 'bar']}, 
             {id: 5, name: 'e'}, 
             {id: 6, name: 'f', isDirectory: true, children: [{id: 7, name: 'g', isDirectory: true}, {id: 8, name: 'h'}]}
           ]

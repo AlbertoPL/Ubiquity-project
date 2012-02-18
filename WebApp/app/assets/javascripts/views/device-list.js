@@ -6,7 +6,7 @@
     '<td class="owner span2"><%= owner %></td>' + 
     '<td class="projects span1"><div class="btn-group pull-right">' + 
       '<a href="#" class="btn dropdown-toggle" data-toggle="dropdown">Projects <span class="caret"></span></a>' + 
-      '<ul class="dropdown-menu"><li><a href="#">Foo</a></li></ul></div></td></tr>');
+      '<ul class="dropdown-menu"><li class="add-to-project"><a href="#">Add to a Project</a></li></ul></div></td></tr>');
   var projectAssociationTemplate = _.template('<li><a href="#"><%= name %></a></li>');
   var breadcrumbTemplate = _.template('<li><a href="#"><%= name %></a><span class="divider">/</span></li>');
 
@@ -140,7 +140,16 @@
           name: file.get('name'),
           size: file.get('size'),
           owner: file.get('owner')
-        }))
+        }));
+        if(_.size(file.get('projects')) > 0) {
+          var projects = $();
+          _.each(file.get('projects'), function(project) {
+            projects = projects.add($(projectAssociationTemplate({
+              name: project
+            })));
+          });
+          fileEl.find('.projects .dropdown-menu').prepend(projects.add('<li class="divider"></li>'));
+        } 
         if(file.get('isDirectory')) {
           fileEl.addClass('directory');
         }

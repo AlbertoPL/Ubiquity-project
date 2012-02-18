@@ -5,7 +5,8 @@ $(function() {
       size: '10MB',
       owner: 'You',
       isDirectory: false,
-      children: null
+      children: null,
+      projects: []
     },
 
     initialize: function() {
