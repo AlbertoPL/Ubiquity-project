@@ -2,18 +2,25 @@ $(function() {
   var Project = Backbone.Model.extend({
     defaults: {
       name: 'Project0',
-      files: null
+      files: null,
+      users: null
     },
 
     initialize: function() {
-      var files = this.get('files');
+      var files = this.get('files'), users = this.get('users');
       if(_.isArray(files)) {
         files = new FileCollection(files);
       } else {
         files = new FileCollection;
       }
+      if(_.isArray(users)) {
+        users = new FileCollection(users);
+      } else {
+        users = new FileCollection;
+      }
       this.set({
-        files: files
+        files: files,
+        users: users
       });
     }
   });
