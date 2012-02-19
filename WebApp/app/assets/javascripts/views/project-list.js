@@ -5,6 +5,9 @@
     '<td class="projects span1"><div class="btn-group pull-right">' + 
       '<a href="#" class="btn dropdown-toggle" data-toggle="dropdown">Options <span class="caret"></span></a>' + 
       '<ul class="dropdown-menu"><li class="remove-from-project"><a href="#">Remove from Project</a></li></ul></div></td></tr>');
+  var userTemplate = _.template('<li class="span1"><div class="thumbnail">' + 
+    '<a href="/users/<%= username %>"><img src="<%= pic %>" alt="<%= username %>"/><h4><%= username %></h4></a>' + 
+    '</div></li>');
 
   $.widget('ubiquity.projectList', {
     options: {
@@ -27,6 +30,8 @@
         .on('click', 'a', _.bind(this._changeProjectHandler, this));
       this.fileTreeContainer = this.element.find('.project-files');
       this.fileTreeBody = this.fileTreeContainer.find('tbody');
+      this.usersContainer = $('<ul class="user-thumbnails thumbnails"></ul>');
+      this.element.find('#users').append(this.usersContainer);
       this._reset();
       this.refresh();
     },
@@ -48,6 +53,7 @@
       this.activeProject = null;
       this.projectContainer.empty();
       this.fileTreeBody.empty();
+      this.usersContainer.empty();
     },
 
     refresh: function() {
@@ -88,6 +94,7 @@
       if(projectElement.size() > 0) {
         this.activeProject = project;
         this._renderTree();
+        this._renderUsers();
       }
     },
 
@@ -128,6 +135,17 @@
         this._renderTree();
       }
       return false;
+    },
+
+    _renderUsers: function() {
+      var self = this;
+      this.usersContainer.fadeOut('fast', function() {
+        self.usersContainer.empty();
+        self.activeProject.get('users').each(function(user) {
+          self.usersContainer.append(userTemplate(user.toJSON()));
+        });
+        self.usersContainer.fadeIn('fast');
+      });
     }
   });
 })(jQuery);

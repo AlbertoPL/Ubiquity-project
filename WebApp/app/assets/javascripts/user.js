@@ -4,7 +4,8 @@ $(function() {
       username: 'Anonymous',
       email: 'anon@ymo.us',
       loggedIn: false,
-      joined: new Date
+      joined: new Date,
+      pic: 'http://www.gravatar.com/avatar/443f71885827eac7afa2a87bb70be610'
     },
 
     initialize: function() {
@@ -16,6 +17,12 @@ $(function() {
     }
   });
 
+  var UserCollection = Backbone.Collection.extend({
+    model: User
+  });
+
+  window['User'] = User;
+  window['UserCollection'] = UserCollection;
   window['currentUser'] = new User;
 
   $('form#login').on('submit', function(evt) {

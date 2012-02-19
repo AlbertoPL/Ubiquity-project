@@ -14,9 +14,9 @@ $(function() {
         files = new FileCollection;
       }
       if(_.isArray(users)) {
-        users = new FileCollection(users);
+        users = new UserCollection(users);
       } else {
-        users = new FileCollection;
+        users = new UserCollection;
       }
       this.set({
         files: files,
