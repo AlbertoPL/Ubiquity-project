@@ -34,6 +34,7 @@ $(function() {
     login.find(':input').attr('disabled', 'disabled');
 
     //TODO: use ajax; this would be the ajax success block
+    //$.ajax({url: '/login', type:'POST', data: {email:'a', password:'b'}, error: function() { console.log(arguments); }, success: function() { console.log(arguments); }});
     login.hide();
     window['currentUser'] = user;
     $('ul#user').find('.username').text(user.get('username')).end()
