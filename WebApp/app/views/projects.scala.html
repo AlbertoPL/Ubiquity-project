@@ -1,10 +1,15 @@
-@()
+@(userData: String)
 
 @main("Projects") {
 <script src="@routes.Assets.at("javascripts/models/files.js")"></script>
 <script src="@routes.Assets.at("javascripts/models/projects.js")"></script>
 <script src="@routes.Assets.at("javascripts/views/project-list.js")"></script>
 <script src="@routes.Assets.at("javascripts/controllers/project-controller.js")"></script>
+<script>
+  window['bootstrap'] = {
+    'currentUser': @Html(userData)
+  };
+</script>
 } {
 <div class="page-header" data-role="header">
   <h1>Your Projects 

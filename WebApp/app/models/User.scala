@@ -30,7 +30,8 @@ object User {
    * Retrieve a User from email.
    */
   def findByEmail(email: String): Option[User] = {
-    Some(User(email, "Bob", ""))
+    if(email == null || email.length == 0) return None
+    else return Some(User(email, "Bob", ""))
     // DB.withConnection { implicit connection =>
     //   SQL("select * from user where email = {email}").on(
     //     'email -> email
@@ -51,7 +52,8 @@ object User {
    * Authenticate a User.
    */
   def authenticate(email: String, password: String): Option[User] = {
-    Some(User(email, "Bob", password))
+    if(email.length == 0) return None
+    else return Some(User(email, "Bob", ""))
     // DB.withConnection { implicit connection =>
     //   SQL(
     //     """

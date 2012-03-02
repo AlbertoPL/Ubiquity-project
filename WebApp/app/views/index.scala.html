@@ -1,7 +1,11 @@
-@()
+@(userData: String = null)
 
 @main("Ubiquity") {
-<!-- TODO: head -->
+<script>
+  window['bootstrap'] = {
+    'currentUser': @Html(userData)
+  };
+</script>
 } {
 <div class="hero-unit" data-role="header">
   <h1>Ubiquity</h1>

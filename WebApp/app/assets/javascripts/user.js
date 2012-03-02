@@ -30,32 +30,42 @@ $(function() {
 
   window['User'] = User;
   window['UserCollection'] = UserCollection;
-  window['currentUser'] = new User;
 
-  $('form#login').on('submit', function(evt) {
-    var login = $(this), userData = {
-      'username': login.find('.username').val(),
-      'password': login.find('.password').val()
-    };
+  if(!_.isUndefined(window['bootstrap']) && 
+      !_.isUndefined(window['bootstrap']['currentUser']) && 
+      window['bootstrap']['currentUser'] !== null) {
 
-    login.find(':input').attr('disabled', 'disabled');
+    displayLoggedInUser(window['bootstrap']['currentUser']);
+  } else {
+    window['currentUser'] = new User;
 
-    $.ajax({
-      url: '/login', 
-      type:'POST', 
-      dataType: 'json',
-      data: {
-        email: userData['username'], 
-        password: userData['password']
-      }, 
-      error: function() { 
-        console.log(arguments); 
-      }, 
-      success: displayLoggedInUser
+    $('form#login').on('submit', function(evt) {
+      var login = $(this), userData = {
+        'username': login.find('.username').val(),
+        'password': login.find('.password').val()
+      };
+
+      login.find(':input').attr('disabled', 'disabled');
+
+      $.ajax({
+        url: '/login', 
+        type:'POST', 
+        dataType: 'json',
+        data: {
+          email: userData['username'], 
+          password: userData['password']
+        }, 
+        error: function() {
+          //TODO 
+          console.log(arguments);
+          login.find(':input').removeAttr('disabled');
+        }, 
+        success: displayLoggedInUser
+      });
+      
+      return false;
     });
-    
-    return false;
-  });
+  }
 
   $('ul#user a.dropdown-toggle').dropdown();
 });

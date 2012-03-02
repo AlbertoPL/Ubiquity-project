@@ -20,6 +20,8 @@ object Application extends Controller with Secured {
     })
   )
 
+  def userJson(user: String) = Json.toJson(User.findByEmail(user)).toString
+
   def authenticate = Action { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => BadRequest(""),
@@ -31,16 +33,16 @@ object Application extends Controller with Secured {
     Redirect(routes.Application.index).withNewSession
   }
 
-  def index = Action {
-    Ok(html.index())
+  def index = Action { implicit request =>
+    Ok(html.index(userJson(username(request).getOrElse(null))))
   }
 
-  def devices = IsAuthenticated { _ => _ =>
-    Ok(html.devices())
+  def devices = IsAuthenticated { username => _ =>
+    Ok(html.devices(userJson(username)))
   }
 
-  def projects = IsAuthenticated { _ => _ =>
-    Ok(html.projects())
+  def projects = IsAuthenticated { username => _ =>
+    Ok(html.projects(userJson(username)))
   }
 }
 
@@ -52,7 +54,7 @@ trait Secured {
   /**
    * Retrieve the connected user email.
    */
-  private def username(request: RequestHeader) = request.session.get("email")
+  def username(request: RequestHeader) = request.session.get("email")
 
   /**
    * Redirect to login if the user in not authorized.
