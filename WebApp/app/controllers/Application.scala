@@ -4,11 +4,12 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.libs.json._
 
 import models._
 import views._
 
-object Application extends Controller {
+object Application extends Controller with Secured {
 
   val loginForm = Form(
     tuple(
@@ -22,7 +23,7 @@ object Application extends Controller {
   def authenticate = Action { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => BadRequest(""),
-      user => Ok.withSession("email" -> user._1)
+      user => Ok(Json.toJson(User.findByEmail(user._1))).withSession("email" -> user._1)
     )
   }
 
@@ -30,11 +31,11 @@ object Application extends Controller {
     Ok(html.index())
   }
 
-  def devices = Action {
+  def devices = IsAuthenticated { _ => _ =>
     Ok(html.devices())
   }
 
-  def projects = Action {
+  def projects = IsAuthenticated { _ => _ =>
     Ok(html.projects())
   }
 }

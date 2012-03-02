@@ -27,18 +27,31 @@ $(function() {
 
   $('form#login').on('submit', function(evt) {
     var login = $(this), userData = {
-      username: login.find('.username').val(),
-      loggedIn: true
-    }, user = new User(userData);
+      'username': login.find('.username').val(),
+      'password': login.find('.password').val()
+    };
 
     login.find(':input').attr('disabled', 'disabled');
 
-    //TODO: use ajax; this would be the ajax success block
-    //$.ajax({url: '/login', type:'POST', data: {email:'a', password:'b'}, error: function() { console.log(arguments); }, success: function() { console.log(arguments); }});
-    login.hide();
-    window['currentUser'] = user;
-    $('ul#user').find('.username').text(user.get('username')).end()
-      .add('.login-required').css('display', 'block');
+    $.ajax({
+      url: '/login', 
+      type:'POST', 
+      dataType: 'json',
+      data: {
+        email: userData['username'], 
+        password: userData['password']
+      }, 
+      error: function() { 
+        console.log(arguments); 
+      }, 
+      success: function(rsp) {
+        login.hide();
+        window['currentUser'] = new User(rsp);
+        $('ul#user').find('.username').text(window['currentUser'].get('username')).end()
+          .add('.login-required').css('display', 'block');
+      }
+    });
+    
     return false;
   });
 
