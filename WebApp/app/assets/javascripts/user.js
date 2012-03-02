@@ -1,4 +1,11 @@
 $(function() {
+  function displayLoggedInUser(userJson) {
+    $('form#login').hide();
+    window['currentUser'] = new User(userJson);
+    $('ul#user').find('.username').text(window['currentUser'].get('username')).end()
+      .add('.login-required').css('display', 'block');
+  }
+
   var User = Backbone.Model.extend({
     defaults: {
       username: 'Anonymous',
@@ -44,12 +51,7 @@ $(function() {
       error: function() { 
         console.log(arguments); 
       }, 
-      success: function(rsp) {
-        login.hide();
-        window['currentUser'] = new User(rsp);
-        $('ul#user').find('.username').text(window['currentUser'].get('username')).end()
-          .add('.login-required').css('display', 'block');
-      }
+      success: displayLoggedInUser
     });
     
     return false;

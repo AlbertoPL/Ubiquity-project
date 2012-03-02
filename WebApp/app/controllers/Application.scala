@@ -27,6 +27,10 @@ object Application extends Controller with Secured {
     )
   }
 
+  def logout = Action {
+    Redirect(routes.Application.index).withNewSession
+  }
+
   def index = Action {
     Ok(html.index())
   }

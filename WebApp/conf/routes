@@ -3,6 +3,7 @@
 # ~~~~
 
 POST    /login                      controllers.Application.authenticate
+GET     /logout                     controllers.Application.logout
 
 GET     /                           controllers.Application.index
 GET     /devices                    controllers.Application.devices
