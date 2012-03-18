@@ -9,3 +9,4 @@ target
 .history
 .scala_dependencies
 *.iml
+.idea
