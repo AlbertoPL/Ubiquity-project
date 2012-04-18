@@ -25,10 +25,10 @@ class MessageSender(c: Messageable) extends Actor {
 
   var running: Boolean = false
   var master: Messageable = c
-  var messageQueue: List[Message] = new ArrayList[Message]
+  var messageQueue: List[FileMessage] = new ArrayList[FileMessage]
   var out: ObjectOutputStream = new ObjectOutputStream(master.outputStream)
 
-  def enqueueMessage(m: Message) {
+  def enqueueMessage(m: FileMessage) {
     messageQueue.add(m);
   }
 

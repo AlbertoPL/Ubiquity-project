@@ -16,12 +16,19 @@ public class MessageCode {
 	public static final int DEVICE_NOT_SUPPORTED = 7; //tell client device is not supported
 	public static final int NOT_LOGGED_IN = 8; //client is not logged in
 	
+	
+	
 	//CLIENT SEND CODES
 	public static final int SEND_AUTH = 0; //send server authentication
 	public static final int SEND_DIRECTORY = 4; //send directory
 	public static final int SEND_FILE = 5; //send file
 	public static final int SEND_NAME_AND_OS = 6; //send name and OS
 	
+	public static final int BACKUP_FILE = 9; //backup a file
+	
+	public static final int REQUEST_FILES_OF_TYPE = 10; //request files of a certain filetype
+	
+	public static final int FILE = 11; //a file message, contains file data
 	/*public static final int SERVER_REQUEST_AUTH = 0; //being asked for authentication
 	public static final int SERVER_ACCEPT_AUTH = 1; //authentication was accepted
 	public static final int SERVER_REJECT_AUTH = 2; //authentication was rejected

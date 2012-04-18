@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 public class ProjectPanelListener implements ActionListener {
@@ -16,6 +17,10 @@ public class ProjectPanelListener implements ActionListener {
 	public ProjectPanelListener(ScholarFrame frame) {
 		this.frame = frame;
 		this.fileChooser = new JFileChooser();
+		fileChooser.setMultiSelectionEnabled(false);
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Ubiquity Projects", "uprj");
+		fileChooser.setFileFilter(filter);
 	}
 	
 	@Override
@@ -40,21 +45,64 @@ public class ProjectPanelListener implements ActionListener {
 			}
 		}
 		else if (command.equals("Open")) {
-			String path = frame.getProjectPanel().getSelectedProjectPath() + ".uprj";
-
+			String path = frame.getProjectPanel().getSelectedProjectPath();
+			System.out.println("PATH BEING OPENED: " + path);
 			if (!path.equals(frame.getCurrentProject().getSaveLocation())) {
 				if (!frame.isDirty()) {
-			
-				    Project project = new Project(new File(path));
-					frame.setCurrentProject(project);
-					frame.clean();
+					File f = new File(path);
+					if (f.exists()) {
+						//Create the file, then 
+					    Project project = new Project(f);
+						frame.setCurrentProject(project);
+						frame.clean();
+					}
+					else if (frame.isConnected()){
+						frame.getController().getRemoteFile(path);
+						
+						do {
+							f = new File(frame.getController().getRemoteFileStore() + frame.getProjectPanel().getSelectedProjectName() + ".uprj");
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						while (f.length() < frame.getFilePathLength(path));
+						Project project = new Project(f);
+						frame.setCurrentProject(project);
+						frame.clean();
+					}
+					else {
+						System.out.println("File doesn't exist, but can't be retrieved because we're not connected");
+					}
 				}
 				else {
 					int option = JOptionPane.showConfirmDialog(frame.getContentPane(), "Save current project?", "Unsaved changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 					if (option == JOptionPane.NO_OPTION) {
-							Project project = new Project(new File(path));
+						File f = new File(path);
+						if (f.exists()) {
+							//Create the file, then 
+						    Project project = new Project(f);
 							frame.setCurrentProject(project);
 							frame.clean();
+						}
+						else if (frame.isConnected()){
+							frame.getController().getRemoteFile(path);
+							f = new File(frame.getController().getRemoteFileStore() + frame.getProjectPanel().getSelectedProjectName() + ".uprj");
+							while (f.length() < frame.getFilePathLength(path)) {
+								try {
+									Thread.sleep(100);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							Project project = new Project(f);
+							frame.setCurrentProject(project);
+							frame.clean();
+						}
+						else {
+							System.out.println("File doesn't exist, but can't be retrieved because we're not connected");
+						}
 					}
 					else if (option == JOptionPane.YES_OPTION){
 						if (frame.getCurrentProject().getName().isEmpty()) {
@@ -63,10 +111,14 @@ public class ProjectPanelListener implements ActionListener {
 						        File file = fileChooser.getSelectedFile();
 						        try {
 									frame.getCurrentProject().saveProject(file.getName(), file.getCanonicalPath());
-									frame.setTitleString(file.getName());
+									frame.setTitleString(file.getName().substring(0, file.getName().lastIndexOf(".uprj")));
 									frame.clean();
 									frame.getDatabase().saveProject(file.getName(), file.getCanonicalPath());
-									frame.getProjectPanel().addElement(file.getName());
+									frame.getProjectPanel().addElement(file.getName().substring(0, file.getName().lastIndexOf(".uprj")));
+									frame.addProjectToMap(file.getName(), file.getCanonicalPath());
+									if (frame.isConnected()) {
+										frame.getController().backupFile(file.getName(), file.getCanonicalPath(), file.length());
+									}
 						        } catch (IOException e) {
 									JOptionPane.showMessageDialog(frame.getContentPane(), "The current project could not be saved!", "Error saving project!", JOptionPane.ERROR_MESSAGE);
 									e.printStackTrace();
@@ -78,10 +130,34 @@ public class ProjectPanelListener implements ActionListener {
 						else {
 							frame.getCurrentProject().saveProject(frame.getCurrentProject().getName(), frame.getCurrentProject().getSaveLocation());
 							frame.clean();
+							if (frame.isConnected()) {
+								frame.getController().backupFile(frame.getCurrentProject().getName(), frame.getCurrentProject().getSaveLocation(), new File(frame.getCurrentProject().getSaveLocation()).length());
+							}
 						}
-						Project project = new Project(new File(path));
-						frame.setCurrentProject(project);
-						frame.clean();
+						File f = new File(path);
+						if (f.exists()) {
+							//Create the file, then 
+						    Project project = new Project(f);
+							frame.setCurrentProject(project);
+							frame.clean();
+						}
+						else if (frame.isConnected()){
+							frame.getController().getRemoteFile(path);
+							f = new File(frame.getController().getRemoteFileStore() + frame.getProjectPanel().getSelectedProjectName() + ".uprj");
+							while (f.length() < frame.getFilePathLength(path)) {
+								try {
+									Thread.sleep(100);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							Project project = new Project(f);
+							frame.setCurrentProject(project);
+							frame.clean();
+						}
+						else {
+							System.out.println("File doesn't exist, but can't be retrieved because we're not connected");
+						}
 					}
 				}
 			}

@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -30,6 +31,7 @@ public class FilesPanel extends JPanel {
 	private Font displayFont;
 	
 	private ButtonPanel buttonPanel;
+	private FileDownloadPanel fileDownloadPanel;
 	
 	@SuppressWarnings("unused")
 	private FileDrop fileDrop;
@@ -98,15 +100,10 @@ public class FilesPanel extends JPanel {
 					String formattedDate = formatter.format(lastmodified);
 					
 					if (fileJList.getSelectedIndices().length > 1) {
-						parent.getTabs().setSelectedFileInfo("Multiple files selected", "", "", "", false, false, "", "");
+						parent.getTabs().setSelectedFileInfo("Multiple files selected", "", "", "", false, "Not shared");
 					}
 					else {
-						if (file.getWindowLeftPos() < 0 && file.getWindowTopPos() < 0) {
-							parent.getTabs().setSelectedFileInfo(file.getFileName(), String.valueOf(file.getFileSize()), file.getFilePath(), formattedDate, true, file.isWindowAttached(), "Minimized", file.getWindowWidth() +"," + file.getWindowHeight());
-						}
-						else {
-							parent.getTabs().setSelectedFileInfo(file.getFileName(), String.valueOf(file.getFileSize()), file.getFilePath(), formattedDate, true, file.isWindowAttached(), file.getWindowLeftPos() + "," + file.getWindowTopPos(), file.getWindowWidth() +"," + file.getWindowHeight());
-						}
+						parent.getTabs().setSelectedFileInfo(file.getFileName(), String.valueOf(file.getFileSize()), file.getFilePath(), formattedDate, false, "Not shared");
 					}
 				}
 				else {
@@ -117,7 +114,7 @@ public class FilesPanel extends JPanel {
 					buttonPanel.setRemoveEnabled(false);
 					buttonPanel.setShareEnabled(false);
 					buttonPanel.setBackupEnabled(false);
-					parent.getTabs().setSelectedFileInfo("", "", "", "", false, false, "", "");
+					parent.getTabs().setSelectedFileInfo("", "", "", "", false, "Not shared");
 				}
 				parent.invalidate();
 				parent.validate();
@@ -130,8 +127,11 @@ public class FilesPanel extends JPanel {
 		buttonPanel.setOpenEnabled(true);
 		buttonPanel.addActionListener(new FilePanelListener(parent));
 		
+		fileDownloadPanel = new FileDownloadPanel();
+		
 		this.add(fileScrollPane);
 		this.add(buttonPanel);
+		this.add(fileDownloadPanel);
 	}
 	
 	public DefaultListModel getListModel() {
@@ -146,47 +146,84 @@ public class FilesPanel extends JPanel {
 		parent.setDirty();
 	}
 	
-	public void openSelectedFile() {
+	public void backupSelectedFile() {
 		for (Integer i: fileJList.getSelectedIndices()) {
 			try {
+				File f = new File((String)fileList.get(i));
+				parent.getController().backupFile(f.getName(), f.getCanonicalPath(), f.length());
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void shareSelectedFile() {
+		//TODO: Prompt for usernames/emails of users
+		for (Integer i: fileJList.getSelectedIndices()) {
+			try {
+				File f = new File((String)fileList.get(i));
+				parent.getController().shareFile(f.getName(), f.getCanonicalPath(), f.length());
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void openSelectedFile() {
+		for (final Integer i: fileJList.getSelectedIndices()) {
+			try {
 				File f = new File((String) fileList.get(i));
-				Desktop.getDesktop().open( f);
-				ProjectFile pf = parent.getCurrentProject().getProjectFile(f.getCanonicalPath());
-				String windowName = pf.getWindowName();
-				int height = pf.getWindowHeight();
-				int width = pf.getWindowWidth();
-				int leftPos = pf.getWindowLeftPos();
-				int topPos = pf.getWindowTopPos();
-				
-				boolean executed = false;
-				String foundWindow = "";
-				do {
-					Process p = Runtime.getRuntime().exec
-			                ("openwindow.exe");
-					String line;
-					BufferedReader input =
-			                new BufferedReader(new InputStreamReader(p.getInputStream()));
-			        while ((line = input.readLine()) != null) {
-			        	line = line.substring(line.indexOf(' ') + 1);
-			        	line = line.substring(line.indexOf(' ') + 1);
-			        	line = line.substring(line.indexOf(' ') + 1);
-			        	line = line.substring(line.indexOf(' ') + 1);
-			            String name = line;
-			            if (name.equals(windowName)) {
-			            	foundWindow = name;
-			            	break;
-			            }
-			        }
-			        input.close();
-			        p.destroy();
-			        if (pf.isWindowAttached() && !foundWindow.isEmpty()) {
-						p = Runtime.getRuntime().exec
-				                ("openwindow.exe " + "\"" + windowName + "\"" + " " + leftPos + " " + topPos + " " + width + " " + height);
-						executed = true;
-			        }
+				if (f.exists()) {
+					Desktop.getDesktop().open( f);
+					ProjectFile pf = parent.getCurrentProject().getProjectFile(f.getCanonicalPath());
+
 				}
-				while (pf.isWindowAttached() && !executed);
-				
+				else if (parent.isConnected()) {
+					parent.getController().getRemoteFile((String) fileList.get(i));
+					final String filepath = (String) fileList.get(i);
+					new Thread(new Runnable() {
+
+						@Override
+						public void run() {
+							File file;
+							setFileDownloadProgress(filepath, parent.getFilePathLength(filepath));
+							
+							do {
+								System.out.println("Getting this file: " + parent.getController().getRemoteFileStore() + parent.getCurrentProject().getProjectFile(filepath).getFileName());
+								file = new File(parent.getController().getRemoteFileStore() + parent.getCurrentProject().getProjectFile(filepath).getFileName());
+								
+							        SwingUtilities.invokeLater(new Runnable() {
+							          public void run() {
+											updateFileDownloadProgress(new File(parent.getController().getRemoteFileStore() + parent.getCurrentProject().getProjectFile(filepath).getFileName()).length());
+											
+							          }
+							        });
+							       
+							      
+								try {
+									Thread.sleep(100);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							while (file.length() < parent.getFilePathLength(filepath));
+							resetFileDownloadProgress();
+							try {
+								Desktop.getDesktop().open( file);
+								ProjectFile pf = parent.getCurrentProject().getProjectFile(file.getCanonicalPath());
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						
+					}).start();
+					
+				}
+				else {
+					System.out.println("File doesn't exist, but can't be retrieved because we're not connected");
+				}
 			}
 			catch (IOException e) {
 				JOptionPane.showMessageDialog(parent.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
@@ -202,38 +239,6 @@ public class FilesPanel extends JPanel {
 					File f = new File((String) file);
 						Desktop.getDesktop().open( f );
 						ProjectFile pf = parent.getCurrentProject().getProjectFile(f.getCanonicalPath());
-						String windowName = pf.getWindowName();
-						int height = pf.getWindowHeight();
-						int width = pf.getWindowWidth();
-						int leftPos = pf.getWindowLeftPos();
-						int topPos = pf.getWindowTopPos();
-						
-						String foundWindow = "";
-						do {
-							Process p = Runtime.getRuntime().exec
-					                ("openwindow.exe");
-							String line;
-							BufferedReader input =
-					                new BufferedReader(new InputStreamReader(p.getInputStream()));
-					        while ((line = input.readLine()) != null) {
-					        	line = line.substring(line.indexOf(' ') + 1);
-					        	line = line.substring(line.indexOf(' ') + 1);
-					        	line = line.substring(line.indexOf(' ') + 1);
-					        	line = line.substring(line.indexOf(' ') + 1);
-					            String name = line;
-					            if (name.equals(windowName)) {
-					            	foundWindow = name;
-					            	break;
-					            }
-					        }
-					        input.close();
-					        p.destroy();
-						}
-						while (!foundWindow.isEmpty());
-						
-						@SuppressWarnings("unused")
-						Process p = Runtime.getRuntime().exec
-				                ("openwindow.exe " + "\"" + windowName + "\"" + " " + leftPos + " " + topPos + " " + width + " " + height);
 				}
 				catch (IOException e) {
 					JOptionPane.showMessageDialog(parent.getContentPane(), "No default program to open " + (String) fileList.get(fileJList.getSelectedIndex()) + " exists!", "Can't open file!", JOptionPane.ERROR_MESSAGE);
@@ -249,5 +254,18 @@ public class FilesPanel extends JPanel {
 	
 	public void addElement(String file) {
 		fileList.addElement(file);
+	}
+	
+	private void setFileDownloadProgress(String filepath, long filelength) {
+		fileDownloadPanel.setFileDownloadString(filepath);
+		fileDownloadPanel.setProgressBarMax(filelength);
+	}
+	
+	private void updateFileDownloadProgress(long currentFileLength) {
+		fileDownloadPanel.updateProgressBar(currentFileLength);
+	}
+	
+	private void resetFileDownloadProgress() {
+		fileDownloadPanel.resetProgressBar();
 	}
 }

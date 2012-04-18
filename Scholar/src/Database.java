@@ -82,9 +82,12 @@ public class Database {
 
 		ResultSet resultSet = statement.executeQuery();
 		while (resultSet.next()) {
+			System.out.println("Project name: " + resultSet.getString("PROJECTNAME"));
+			System.out.println("Project path: " + resultSet.getString("PROJECTPATH"));
+
 			String name = resultSet.getString("PROJECTNAME");
 			String path = resultSet.getString("PROJECTPATH");
-			projects.put(name, path);
+			projects.put(name.substring(0, name.lastIndexOf(".uprj")), path);
 		}
 		
 		return projects;

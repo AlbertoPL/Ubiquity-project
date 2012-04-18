@@ -1,8 +1,5 @@
 package client;
 
-import net.contentobjects.jnotify.JNotify;
-import net.contentobjects.jnotify.JNotifyException;
-import net.contentobjects.jnotify.JNotifyListener;
 
 public class FileMonitor implements Runnable {
 
@@ -10,8 +7,14 @@ public class FileMonitor implements Runnable {
 	
 	public FileMonitor(Client c) {
 	}
-	
+
 	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/*@Override
 	public void run() {
 		String path = System.getProperty("user.home");
 
@@ -57,5 +60,5 @@ public class FileMonitor implements Runnable {
 	    void print(String msg) {
 	   //   System.err.println(msg);
 	    }
-	}
+	}*/
 }

@@ -1,7 +1,9 @@
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 
@@ -9,36 +11,37 @@ public class ProjectFile {
 
 	private String filename;
 	private String filepath;
+	private long filelength;
 	
-	private String windowName;
-	private int windowHeight;
-	private int windowWidth;
-	private int windowLeftPos;
-	private int windowTopPos;
-	private boolean windowAttached;
+	private boolean backedUp;
+	private List<String> sharedWith;
+	
 	
 	private ProjectFile() {
 		filename = "";
 		filepath = "";
-		windowHeight = -1;
-		windowWidth = -1;
-		windowLeftPos = -1;
-		windowTopPos = -1;
-		windowAttached = false;
+		filelength = 0;
+		backedUp = false;
+		sharedWith = new ArrayList<String>();
 	}
 	
 	public ProjectFile(String filename, String filepath) {
 		this();
 		this.filename = filename;
 		this.filepath = filepath;
+		filelength = new File(filepath).length();
 	}
 	
-	public void setWindowSettings(int windowHeight, int windowWidth, int windowLeftPos, int windowTopPos) {
-		this.windowHeight = windowHeight;
-		this.windowWidth = windowWidth;
-		this.windowLeftPos = windowLeftPos;
-		this.windowTopPos = windowTopPos;
-		attachWindow();
+	public void setBackupStatus(boolean backedUp) {
+		this.backedUp = backedUp;
+	}
+	
+	public void addSharedWith(String username) {
+		sharedWith.add(username);
+	}
+	
+	public void removeSharedWith(String username) {
+		sharedWith.remove(username);
 	}
 	
 	public File getFile() {
@@ -53,8 +56,8 @@ public class ProjectFile {
 		return filepath;
 	}
 	
-	public double getFileSize() {
-		return new File(filepath).length();
+	public long getFileSize() {
+		return filelength;
 	}
 	
 	public Date getFileModified() {
@@ -66,43 +69,11 @@ public class ProjectFile {
 		return formatter.format(new File(filepath).lastModified());
 	}
 	
-	public void setWindowName(String windowName) {
-		this.windowName = windowName;
+	public boolean isBackedUp() {
+		return backedUp;
 	}
 	
-	public String getWindowName() {
-		return windowName;
-	}
-	
-	public int getWindowHeight() {
-		return windowHeight;
-	}
-	
-	public int getWindowWidth() {
-		return windowWidth;
-	}
-	
-	public int getWindowLeftPos() {
-		return windowLeftPos;
-	}
-	
-	public int getWindowTopPos() {
-		return windowTopPos;
-	}
-	
-	public boolean isWindowAttached() {
-		return windowAttached;
-	}
-	
-	public void attachWindow() {
-		this.windowAttached = true;
-	}
-	
-	public void detachWindow() {
-		this.windowAttached = false;
-		windowHeight = -1;
-		windowWidth = -1;
-		windowLeftPos = -1;
-		windowTopPos = -1;
+	public List<String> getSharedWith() {
+		return sharedWith;
 	}
 }

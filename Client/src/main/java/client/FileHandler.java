@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import message.Message;
+import message.FileMessage;
 import file.FileReceiver;
 import file.FileSender;
 
@@ -30,7 +30,7 @@ public class FileHandler implements Runnable {
 	
 	public FileHandler(Client client) {
 		fileSender = new FileSender(client.rootFolder());		
-	    fileReceiver = new FileReceiver(client, client.rootFolder());
+	    fileReceiver = new FileReceiver(client.rootFolder());
 	    hostname = client.host();
 	    sending = false;
 	    receiving = false;
@@ -49,7 +49,7 @@ public class FileHandler implements Runnable {
 		this.port = port;
 	}
 	
-	public void setFileToSendMetadata(Message m) {
+	public void setFileToSendMetadata(FileMessage m) {
 		fileSender.enqueueMessage(m);
 	}
 

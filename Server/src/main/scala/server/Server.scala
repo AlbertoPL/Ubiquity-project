@@ -1,19 +1,16 @@
 package server;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-
-import message.Message;
-
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-
-import remote.RmiServer;
+import java.io.FileInputStream
+import java.io.IOException
+import java.net.ServerSocket
+import java.net.Socket
+import java.rmi.RemoteException
+import java.util.ArrayList
+import java.util.List
+import message.Message
+import org.apache.commons.configuration.ConfigurationException
+import org.apache.commons.configuration.PropertiesConfiguration
+import message.FileMessage
 
 /**
  * The Server implements Messageable so that the Server defines methods
@@ -31,7 +28,7 @@ object Server {
     var t = new Thread(s)
     t.start
 
-    var rmi = new RmiServer(s);
+  //  var rmi = new RmiServer(s);
   }
 }
 
@@ -84,20 +81,22 @@ class Server extends Runnable {
       case ioe: IOException => ioe.printStackTrace
     }
 
-    clientHandlers.foreach(_.stop)
+//    clientHandlers.foreach(_.stop)
   }
 
-  def sendMessageToClient(username: String, deviceName: String, m: Message): Boolean = {
-    clientHandlers = clientHandlers.filter(_.connected)
-    var ret = clientHandlers.filter { handler =>
-      handler.username == username && handler.deviceName == deviceName
-    } headOption match {
-      case Some(handler) =>
-        handler.messageSender.enqueueMessage(m)
-        return true
-      case None =>
-        return false
-    }
-    ret
+  def sendMessageToClient(username: String, deviceName: String, m: FileMessage): Boolean = {
+  //  clientHandlers = clientHandlers.filter(_.connected)
+  //  var ret = clientHandlers.filter { handler =>
+   //   handler.username == username && handler.deviceName == deviceName
+   // } headOption match {
+    //  case Some(handler) =>
+     // //  handler.messageSender.enqueueMessage(m)
+     //   return true
+     // case None =>
+     //   return false
+   // }
+   // ret
+  false
   }
+    
 }

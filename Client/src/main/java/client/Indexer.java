@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import message.Message;
+import message.FileMessage;
 import message.MessageCode;
 
 /**
@@ -27,7 +27,6 @@ public class Indexer implements Runnable {
 	private List<String> music;
 	private List<String> videos;
 	private List<String> documents;
-	
 	
 	public Indexer(Client c) {
 		music = new ArrayList<String>();

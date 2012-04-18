@@ -8,26 +8,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import message.Message;
-import message.MessageCode;
-import message.Messageable;
+import message.FileMessage;
 
 public class FileReceiver implements Runnable {
 
 	private boolean running;
 	private final static int BUFFER = 2048;
 	
-	private List<Message> fileMessageQueue;
+	private List<FileMessage> fileMessageQueue;
 	private DataInputStream in;
 	
 	private String rootFolder = "";
 	
-	private Messageable master;
 	
-	public FileReceiver(Messageable master, String rootFolder) {
-		this.master = master;
+	public FileReceiver(String rootFolder) {
 		this.rootFolder = rootFolder;
-		fileMessageQueue = new ArrayList<Message>();
+		fileMessageQueue = new ArrayList<FileMessage>();
 		running = false;
 	}
 	
@@ -35,7 +31,7 @@ public class FileReceiver implements Runnable {
 		this.in = in;
 	}
 	
-	public void enqueueMessage(Message m) {
+	public void enqueueMessage(FileMessage m) {
 		fileMessageQueue.add(m);
 	}
 	

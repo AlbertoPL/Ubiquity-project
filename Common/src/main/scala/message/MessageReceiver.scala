@@ -24,14 +24,14 @@ class MessageReceiver(c: Messageable) extends Actor {
   var connected: Boolean = false
 
   var master: Messageable = c
-  var messageQueue: List[Message] = new ArrayList[Message]
+  var messageQueue: List[FileMessage] = new ArrayList[FileMessage]
   var in: ObjectInputStream = new ObjectInputStream(master.inputStream)
 
-  def enqueueMessage(m: Message) {
+  def enqueueMessage(m: FileMessage) {
     messageQueue.add(m);
   }
 
-  def dequeueMessage =
+  def FileMessage =
     if (messageQueue.isEmpty) {
       null
     } else {
@@ -48,7 +48,7 @@ class MessageReceiver(c: Messageable) extends Actor {
     while (running) {
       while (master.connected && connected && in != null) {
         try {
-          var m: Message = in.readObject.asInstanceOf[Message]
+          var m: FileMessage = in.readObject.asInstanceOf[FileMessage]
           System.out.println("Message received");
           if (m.getCode == -1) {
             connected = false;

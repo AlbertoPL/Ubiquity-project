@@ -25,9 +25,9 @@ trait Messageable {
    * @param code - the integer code received from a network source
    * @return None
    */
-  def interpretCode(message: Message): Unit
+ // def interpretCode(message: Message): Unit
   def receiverDisconnected: Unit
-  def fileReceivedCallback(filename: String, message: Message): Unit
+  def fileReceivedCallback(filename: String, message: FileMessage): Unit
 
   def inputStream: InputStream = {
     try {

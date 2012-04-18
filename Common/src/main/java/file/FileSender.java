@@ -8,18 +8,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import message.Message;
+import message.FileMessage;
 
 public class FileSender implements Runnable {
 
 	private boolean running;
 	private final static int BUFFER = 2048;
 
-	private List<Message> fileMessageQueue;
+	private List<FileMessage> fileMessageQueue;
 	private DataOutputStream out;
 	
 	public FileSender(String rootFolder) {
-		fileMessageQueue = new ArrayList<Message>();
+		fileMessageQueue = new ArrayList<FileMessage>();
 		running = false;
 	}
 	
@@ -27,13 +27,12 @@ public class FileSender implements Runnable {
 		this.out = out;
 	}
 	
-	public void enqueueMessage(Message m) {
+	public void enqueueMessage(FileMessage m) {
 		fileMessageQueue.add(m);
 	}
 	
-	private Message dequeueMessage() {
+	private FileMessage dequeueMessage() {
 		if (fileMessageQueue.isEmpty()) {
-			running = false;
 			return null;
 		}
 		return fileMessageQueue.remove(0);
@@ -52,11 +51,11 @@ public class FileSender implements Runnable {
 		running = true;
 		
 		if (running && out != null) {
-			Message m = dequeueMessage();
+			FileMessage m = dequeueMessage();
 			byte[] mybytearray = new byte[BUFFER];
 			if (m != null) {
 				try {
-					File f = new File(m.getPayload());
+					File f = new File(new String(m.getPayload()));
 					
 					if (f.exists()) {
 						out.writeInt(f.getName().length());
@@ -85,6 +84,12 @@ public class FileSender implements Runnable {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			}
+			try {
+				Thread.sleep(5000); 
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 		else {

@@ -1,3 +1,7 @@
+import file.UbiquityFileData;
+import interfaces.Serviceable;
+import interfaces.View;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -5,9 +9,14 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -22,7 +31,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 
-public class ScholarFrame extends JFrame {
+public class ScholarFrame extends JFrame implements View {
 
 	/**
 	 * 
@@ -40,6 +49,8 @@ public class ScholarFrame extends JFrame {
 	private JMenuItem saveProject;
 	private JMenuItem about;
 	private JMenuItem hide;
+	
+	private ConnectionPanel connectionPanel;
 	
 	private ProjectsPanel projectPanel;
 	
@@ -59,8 +70,6 @@ public class ScholarFrame extends JFrame {
 	private JPanel footer;
 	private JLabel onlineStatus;
 	
-	private boolean isConnected = false;
-	
 	private String title = "";
 	private boolean dirty = false;
 	
@@ -70,7 +79,27 @@ public class ScholarFrame extends JFrame {
 	
 	private Map<String,String> projects;
 	
-	public ScholarFrame() {
+	private Map<String, UbiquityFileData> projectFileMetadataMap;
+	
+	private Properties properties;
+	
+	private Serviceable controller;
+	
+	private boolean connected = false;
+	
+	public ScholarFrame(Serviceable controller) {
+		
+		this.controller = controller;
+		
+		properties = new Properties();
+		try {
+			properties.load(new FileInputStream("scholar.properties"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
@@ -120,6 +149,10 @@ public class ScholarFrame extends JFrame {
 						        try {
 									frame.getCurrentProject().saveProject(file.getName(), file.getCanonicalPath());
 									frame.setTitle("Ubiquity Scholar - " + file.getName());
+									frame.addProjectToMap(file.getName(), file.getCanonicalPath());
+									if (frame.isConnected()) {
+										frame.getController().backupFile(file.getName(), file.getCanonicalPath(), file.length());
+									}
 									System.exit(0);
 						        } catch (IOException ioe) {
 									JOptionPane.showMessageDialog(frame.getContentPane(), "The current project could not be saved!", "Error saving project!", JOptionPane.ERROR_MESSAGE);
@@ -129,6 +162,9 @@ public class ScholarFrame extends JFrame {
 						}
 						else {
 							frame.getCurrentProject().saveProject(frame.getCurrentProject().getName(), frame.getCurrentProject().getSaveLocation());
+							if (frame.isConnected()) {
+								frame.getController().backupFile(frame.getCurrentProject().getName(), frame.getCurrentProject().getSaveLocation(), new File(frame.getCurrentProject().getSaveLocation()).length());
+							}
 							System.exit(0);
 						}
 					}
@@ -144,6 +180,7 @@ public class ScholarFrame extends JFrame {
 	
 	private void initUI() {
 		createMenu();
+		createHeader();
 		createProjectList();
 		createProjectFileList();
 		createTabs();
@@ -154,7 +191,7 @@ public class ScholarFrame extends JFrame {
 		currentProject = new Project();
 	    database = new Database();
 	    database.connectToDB();
-	    
+	    projectFileMetadataMap = new HashMap<String, UbiquityFileData>();
 	    try {
 			projects = database.getProjects();
 		} catch (SQLException e) {
@@ -215,6 +252,11 @@ public class ScholarFrame extends JFrame {
 		about.addActionListener(allListener);
 		
 		this.setJMenuBar(menubar);
+	}
+	
+	private void createHeader() {
+		connectionPanel = new ConnectionPanel(this);
+		this.add(connectionPanel, BorderLayout.NORTH);
 	}
 	
 	private void createProjectList() {
@@ -289,13 +331,20 @@ public class ScholarFrame extends JFrame {
 	public void setCurrentProject(Project p) {
 		currentProject = p;
 		if (currentProject != null && currentProject.getProjectFiles() != null) {
-			setTitleString(currentProject.getName());
+			setTitleString(currentProject.getName().substring(0, currentProject.getName().lastIndexOf(".uprj")));
 			filePanel.removeAllElements();
+			//projectFileMetadataMap.clear();
 			for (ProjectFile f: currentProject.getProjectFiles()) {
 				filePanel.addElement(f.getFilePath());
+				projectFileMetadataMap.put(f.getFilePath(), new UbiquityFileData(f.getFileName(), f.getFilePath(), f.getFileSize()));
 			}
 			changeTitle();
 		}
+	}
+	
+	public void login() {
+		String userPass = LoginDialog.showDialog(this, this, "Login", "Login");
+		controller.login(userPass.substring(0, userPass.indexOf(':')), userPass.substring(userPass.indexOf(':') + 1));
 	}
 	
 	public boolean isDirty() {
@@ -350,8 +399,120 @@ public class ScholarFrame extends JFrame {
 		return projects.get(projectname);
 	}
 	
+	public Serviceable getController() {
+		return controller;
+	}
+	
+	public String getOnlineStatus() {
+		return onlineStatus.getText();
+	}
+	
+	public void setOnlineStatus(String status) {
+		onlineStatus.setText(status);
+	}
+	
+	public void loginSuccess(boolean success, String username, String passwordHash, String message) {
+		setConnected(success);
+		if (success) {
+			connectionPanel.setConnected(success, username);
+			setOnlineStatus("Online");
+			getProjectFiles();
+		}
+		else {
+			System.out.println(message);
+			setOnlineStatus("Offline");
+		}
+		invalidate();
+		validate();
+	}
+	
+	public void fileBackupSuccess(boolean success, String filepath) {
+		if (success) {
+			currentProject.getProjectFile(filepath).setBackupStatus(success);
+		}
+		else {
+			//TODO: Make error more robust
+			System.out.println("File " + filepath + " was not able to be backed up");
+		}
+	}
+	
+	public void fileShareSuccess(boolean success, String filepath, List<String> users) {
+		if (success) {
+			for (String u: users) {
+				currentProject.getProjectFile(filepath).addSharedWith(u);
+			}
+		}
+		else {
+			//TODO: Make error more robust
+			System.out.println("File " + filepath + " was not able to be shared!");
+		}
+	}
+	
+	/*public void backupProjectFile(String name, String filepath) {
+		controller.backupFile(name, filepath+".uprj", new File(filepath+".uprj").length());
+	}*/
+	
+	public void getProjectFiles() {
+		controller.getFilesByType(2); //TODO: 2 is ubiquity project. It is hardcoded. Should go in some properties file
+	}
+	
+	public void getFilesByTypeSuccess(int filetypeid, UbiquityFileData[] files) {
+		System.out.println("File type id in getFilesByTypeSuccess: " + filetypeid);
+		switch(filetypeid) {
+		case 2: //ubiquity project files
+			for(int x = 0; x < files.length; ++x) {
+				System.out.println("Name: " + files[x].getFilename());
+				System.out.println("File: " + files[x].getFilepath());
+				String path = files[x].getFilepath();
+				String name = files[x].getFilename();
+				System.out.println("FILENAME: " + name);
+				System.out.println("FILEPATH: " + path);
+				if (!projects.containsValue(path)) {
+					System.out.println("Project did not contain path: " + path);
+					projects.put(name.substring(0, name.lastIndexOf(".uprj")), path);
+					projectPanel.addElement(name.substring(0, name.lastIndexOf(".uprj")));
+					projectPanel.invalidate();
+					projectPanel.validate();
+					projectFileMetadataMap.put(path, files[x]);
+				}
+			}
+			invalidate();
+			validate();
+		}
+	}
+	
+	public long getFilePathLength(String filepath) {
+		return projectFileMetadataMap.get(filepath).getFilelength();
+	}
+	
+	public void setConnected(boolean status) {
+		connected = status;
+	}
+	
+	public boolean isConnected() {
+		return connected;
+	}
+	
+	public void addProjectToMap(String name, String path) {
+		if (!projects.containsKey(name.substring(0, name.lastIndexOf(".uprj")))) {
+			projects.put(name.substring(0, name.lastIndexOf(".uprj")), path);
+		}
+	}
+	
 	public static void main(String... args) {
-		new ScholarFrame();
+	/*	Properties properties = new Properties();
+		try {
+			properties.load(new FileInputStream("client.properties"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Client c = new Client();
+		c.startWithDefaults(properties);*/
+		//new ScholarFrame();
+		//Thread t = new Thread(c);
+		//t.start();
 	}
 	
 }

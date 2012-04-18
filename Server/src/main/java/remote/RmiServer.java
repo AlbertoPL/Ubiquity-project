@@ -4,8 +4,10 @@ import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.List;
 
-import message.Message;
+import message.FileMessage;
 import server.Server;
 
 public class RmiServer extends java.rmi.server.UnicastRemoteObject implements ReceiveMessageInterface {
@@ -15,11 +17,13 @@ public class RmiServer extends java.rmi.server.UnicastRemoteObject implements Re
     String thisAddress;
     Registry registry;    // rmi registry for lookup the remote objects.
     
+    List<RemoteFileStreamListener> remoteListeners;
+    
     Server server;
 
     // This method is called from the remote client by the RMI.
     // This is the implementation of the ReceiveMessageInterface.
-	public boolean sendMessageToClient(String username, String devicename, Message m) throws RemoteException {
+	public boolean sendMessageToClient(String username, String devicename, FileMessage m) throws RemoteException {
 		return server.sendMessageToClient(username, devicename, m);
 	}
 
@@ -46,5 +50,11 @@ public class RmiServer extends java.rmi.server.UnicastRemoteObject implements Re
         catch(RemoteException e){
         	throw e;
         }
+        
+        remoteListeners = new ArrayList<RemoteFileStreamListener>();
     }
+
+	public void registerListener(RemoteFileStreamListener r) {
+		remoteListeners.add(r);	
+	}
 }

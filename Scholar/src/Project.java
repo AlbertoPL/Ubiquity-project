@@ -116,7 +116,7 @@ public class Project {
 		try {
 			//write converted json data to a file
 			
-			FileWriter writer = new FileWriter(saveLocation + ".uprj");
+			FileWriter writer = new FileWriter(saveLocation);
 			writer.write(json);
 			writer.close();
 

@@ -25,6 +25,7 @@ public class ProjectsPanel extends JPanel {
 	private ScholarFrame parent;
 	
 	private String selectedProjectPath = "";
+	private String selectedProjectName = "";
 	
 	private ProjectsPanel() {
 		super();
@@ -70,10 +71,18 @@ public class ProjectsPanel extends JPanel {
 					
 					File file = new File(parent.getProjectPath((String) projectList.get(firstSelIx)));
 					
-					try {
-						selectedProjectPath = file.getCanonicalPath();
-					} catch (IOException e) {
-						e.printStackTrace();
+					if (file.exists()) {
+						try {
+							selectedProjectPath = file.getCanonicalPath();
+							selectedProjectName = (String) projectList.get(firstSelIx);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					else {
+						System.out.println("File doesn't exist");
+						selectedProjectPath = parent.getProjectPath((String) projectList.get(firstSelIx));
+						selectedProjectName = (String) projectList.get(firstSelIx);
 					}
 				}
 				else {
@@ -84,8 +93,9 @@ public class ProjectsPanel extends JPanel {
 					buttonPanel.setRemoveEnabled(false);
 					buttonPanel.setShareEnabled(false);
 					buttonPanel.setBackupEnabled(false);
-					parent.getTabs().setSelectedFileInfo("", "", "", "", false, false, "", "");
+					parent.getTabs().setSelectedFileInfo("", "", "", "", false, "Not shared");
 					selectedProjectPath = "";
+					selectedProjectName = "";
 				}
 				parent.invalidate();
 				parent.validate();
@@ -112,5 +122,9 @@ public class ProjectsPanel extends JPanel {
 	
 	public String getSelectedProjectPath() {
 		return selectedProjectPath;
+	}
+	
+	public String getSelectedProjectName() {
+		return selectedProjectName;
 	}
 }
