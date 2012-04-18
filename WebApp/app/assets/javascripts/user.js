@@ -2,13 +2,13 @@ $(function() {
   function displayLoggedInUser(userJson) {
     $('form#login').hide();
     window['currentUser'] = new User(userJson);
-    $('ul#user').find('.username').text(window['currentUser'].get('username')).end()
+    $('ul#user').find('.username').text(window['currentUser'].get('name')).end()
       .add('.login-required').css('display', 'block');
   }
 
   var User = Backbone.Model.extend({
     defaults: {
-      username: 'Anonymous',
+      name: 'Anonymous',
       email: 'anon@ymo.us',
       loggedIn: false,
       joined: new Date,

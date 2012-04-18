@@ -8,3 +8,5 @@ target
 .settings
 .history
 .scala_dependencies
+*.iml
+.idea

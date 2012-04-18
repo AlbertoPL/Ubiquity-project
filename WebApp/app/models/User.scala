@@ -17,9 +17,9 @@ object User {
    * Parse a User from a ResultSet
    */
   val simple = {
-    get[String]("user.email") ~
-    get[String]("user.name") ~
-    get[String]("user.password") map {
+    get[String]("users.email") ~
+    get[String]("users.username") ~
+    get[String]("users.password") map {
       case email~name~password => User(email, name, password)
     }
   }
@@ -30,13 +30,11 @@ object User {
    * Retrieve a User from email.
    */
   def findByEmail(email: String): Option[User] = {
-    if(email == null || email.length == 0) return None
-    else return Some(User(email, "Bob", ""))
-    // DB.withConnection { implicit connection =>
-    //   SQL("select * from user where email = {email}").on(
-    //     'email -> email
-    //   ).as(User.simple.singleOpt)
-    // }
+    DB.withConnection { implicit connection =>
+       SQL("select * from users where email = {email}").on(
+         'email -> email
+       ).as(User.simple.singleOpt)
+    }
   }
   
   /**
@@ -52,19 +50,17 @@ object User {
    * Authenticate a User.
    */
   def authenticate(email: String, password: String): Option[User] = {
-    if(email.length == 0) return None
-    else return Some(User(email, "Bob", ""))
-    // DB.withConnection { implicit connection =>
-    //   SQL(
-    //     """
-    //      select * from user where 
-    //      email = {email} and password = {password}
-    //     """
-    //   ).on(
-    //     'email -> email,
-    //     'password -> password
-    //   ).as(User.simple.singleOpt)
-    // }
+    DB.withConnection { implicit connection =>
+       SQL(
+         """
+          select * from user where
+          email = {email} and password = {password}
+         """
+       ).on(
+         'email -> email,
+         'password -> password
+       ).as(User.simple.singleOpt)
+    }
   }
    
   /**
