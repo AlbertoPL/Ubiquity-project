@@ -413,10 +413,18 @@ public class ScholarFrame extends JFrame implements View {
 	
 	public void loginSuccess(boolean success, String username, String passwordHash, String message) {
 		setConnected(success);
+		connectionPanel.setConnected(success, username);
 		if (success) {
-			connectionPanel.setConnected(success, username);
 			setOnlineStatus("Online");
 			getProjectFiles();
+			//save all local projects as soon as we connect
+			for (File file: projectPanel.getAllLocalProjects()) {
+				try {
+					getController().backupFile(file.getName(), file.getCanonicalPath(), file.length());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		else {
 			System.out.println(message);

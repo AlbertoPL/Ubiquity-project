@@ -66,14 +66,15 @@ public class ConnectionPanel extends JPanel {
 	}
 	
 	public void setConnected(boolean connected, String username) {
+		System.out.println("Connected = " + connected);
 		if (connected) {
 			connect.setText("Disconnect");
 			connectionStatus.setText("Connected as " + username);
-			connect.setEnabled(true);
 		}
 		else {
 			disconnected();
 		}
+		connect.setEnabled(true);
 	}
 	
 	public void disconnected() {

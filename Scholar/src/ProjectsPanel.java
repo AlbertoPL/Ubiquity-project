@@ -1,6 +1,8 @@
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -122,6 +124,17 @@ public class ProjectsPanel extends JPanel {
 	
 	public String getSelectedProjectPath() {
 		return selectedProjectPath;
+	}
+	
+	public List<File> getAllLocalProjects() {
+		List<File> localProjects = new ArrayList<File>();
+		for (int x = 0; x < projectList.size(); ++x) {
+			File file = new File(parent.getProjectPath((String) projectList.get(x)));
+			if (file.exists()) {
+				localProjects.add(file);
+			}
+		}
+		return localProjects;
 	}
 	
 	public String getSelectedProjectName() {

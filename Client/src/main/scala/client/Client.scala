@@ -27,19 +27,16 @@ import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.ConsumerCancelledException
 import com.rabbitmq.client.QueueingConsumer
 import com.rabbitmq.client.ShutdownSignalException
-import client.Database
 import interfaces.Serviceable
-import message.Message
+import message.FileMessage
 import message.MessageCode
 import message.MessageReceiver
 import message.Messageable
-import util.BaseConversion
-import message.FileMessage
-import message.MessageReceiver
-import message.Messageable
-import message.StringListMessage
 import message.RequestMessage
+import message.StringListMessage
 import message.StringMapMessage
+import util.BaseConversion
+import com.rabbitmq.client.Connection
 
 /**
  * A client implements a Messageable interface, which defines methods the
@@ -80,6 +77,8 @@ class Client(controller: Serviceable) extends Messageable {
   var channel: Channel = _
   var BUFFER: Int = 2048*100
   var pathToRemoteFileStore: String = _
+  var factory: ConnectionFactory = new ConnectionFactory()
+  var connection: Connection = _
   //var fileMonitor: FileMonitor = _
   //var serverFactory: FtpServerFactory = _
   //var server: FtpServer = _
@@ -91,7 +90,10 @@ class Client(controller: Serviceable) extends Messageable {
 def startWithDefaults(defaults: Properties) {
     port = Integer.parseInt(defaults.getProperty("port"));
     host = defaults.getProperty("host");
-    pathToRemoteFileStore = defaults.getProperty("remotestore");
+    pathToRemoteFileStore = System.getProperty("user.home") + 
+    		System.getProperty("file.separator") + ".ubiquity" + 
+    		System.getProperty("file.separator") + "projects" + 
+    		System.getProperty("file.separator"); 
     
    // indexer = new Indexer(this);
    // fileMonitor = new FileMonitor(this);
@@ -358,13 +360,13 @@ def startWithDefaults(defaults: Properties) {
   }
   
   def subscribetoqueues() {
-    var factory = new ConnectionFactory();
+    factory = new ConnectionFactory();
     factory.setUsername(username);
     var passwordHash = BaseConversion.toHexString(
 	    MessageDigest.getInstance("SHA").digest(password.getBytes()))
 	factory.setPassword(passwordHash);
 	factory.setHost(host);
-	var connection = factory.newConnection();
+	connection = factory.newConnection();
 	
 	channel = connection.createChannel();
 	channel.exchangeDeclare(username+passwordHash, "topic");
@@ -384,7 +386,7 @@ def startWithDefaults(defaults: Properties) {
 
 				@Override
 				def run() {
-					while (true) {
+					while (connection.isOpen()) {
 						
 						try {
 							var delivery = fileConsumer.nextDelivery();
@@ -449,7 +451,7 @@ def startWithDefaults(defaults: Properties) {
 
 				@Override
 				def run() {
-					while (true) {
+					while (connection.isOpen()) {
 						
 						try {
 							var delivery = consumer.nextDelivery();
@@ -707,7 +709,10 @@ def startWithDefaults(defaults: Properties) {
   }
 
   def stop {
-    running = false;
+    running = false
+    connected = false
+    socket.close()
+    connection.close()
   }
 
   override def receiverDisconnected() {
