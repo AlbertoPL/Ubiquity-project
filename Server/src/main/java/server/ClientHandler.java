@@ -171,7 +171,7 @@ public class ClientHandler implements Runnable {
 						    	filepath = ((ShareFileMessage)m).getFilepath();
 						    	filelength = ((ShareFileMessage)m).getFilelength();
 						    	String userToShareWith = ((ShareFileMessage)m).getUserToShareWith();
-						    	database.shareFile(userId, userToShareWith, filepath, filelength, devicename);
+						    	database.shareFile(userId, userToShareWith, filename, filepath, filelength, devicename);
 						    	break;
 						    default:
 						    	System.err.println("Invalid message code received! " + m.getCode());	
