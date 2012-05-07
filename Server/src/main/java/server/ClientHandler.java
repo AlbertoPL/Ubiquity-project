@@ -20,6 +20,7 @@ import message.FileMessage;
 import message.Message;
 import message.MessageCode;
 import message.RequestMessage;
+import message.ShareFileMessage;
 import message.StringMapMessage;
 
 import com.rabbitmq.client.Channel;
@@ -164,6 +165,13 @@ public class ClientHandler implements Runnable {
 						    	filepath = ((FileMessage)m).getFilepath();
 						    	long filelength = ((FileMessage)m).getFilelength();
 						    	database.storeFileInDatabase(userId, filename, filepath, filelength, devicename);
+						    	break;
+						    case MessageCode.SHARE_FILE:
+						    	filename = ((ShareFileMessage)m).getFilename();
+						    	filepath = ((ShareFileMessage)m).getFilepath();
+						    	filelength = ((ShareFileMessage)m).getFilelength();
+						    	String userToShareWith = ((ShareFileMessage)m).getUserToShareWith();
+						    	database.shareFile(userId, userToShareWith, filepath, filelength, devicename);
 						    	break;
 						    default:
 						    	System.err.println("Invalid message code received! " + m.getCode());	

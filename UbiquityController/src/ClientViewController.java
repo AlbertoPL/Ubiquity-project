@@ -66,8 +66,8 @@ public class ClientViewController implements Serviceable {
 	}
 	
 	@Override
-	public void shareFile(String filename, String filepath, long filesize) {
-		// TODO: IMPLEMENT
+	public void shareFile(String filename, String filepath, long filelength, String usernameToShareWith) {
+		client.shareFile(filename, filepath, filelength, usernameToShareWith);
 	}
 	
 	@Override

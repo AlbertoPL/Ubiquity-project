@@ -37,6 +37,7 @@ import message.StringListMessage
 import message.StringMapMessage
 import util.BaseConversion
 import com.rabbitmq.client.Connection
+import message.ShareFileMessage
 
 /**
  * A client implements a Messageable interface, which defines methods the
@@ -547,6 +548,21 @@ def startWithDefaults(defaults: Properties) {
 		    	
 		    }).start();
   } 
+  
+  def shareFile(filename: String, filepath: String, filelength: Long, usernameToShareWith: String) {
+    System.out.println("Share file requested");
+    var m = new ShareFileMessage(MessageCode.SHARE_FILE, filename, filepath, filelength, usernameToShareWith);
+    var bos = new ByteArrayOutputStream();
+	  var out = new ObjectOutputStream(bos);   
+	  out.writeObject(m);
+	  out.flush();
+	  var yourBytes = bos.toByteArray();
+	  out.close();
+	  bos.close();
+	  var passwordHash = BaseConversion.toHexString(
+	    MessageDigest.getInstance("SHA").digest(password.getBytes()))
+	  channel.basicPublish(username+passwordHash, username+passwordHash+deviceName+"MQserver", null, yourBytes);
+  }
 
   //TODO: REDO THIS!
   def requestFile(filename: String) {

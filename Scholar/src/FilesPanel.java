@@ -160,10 +160,11 @@ public class FilesPanel extends JPanel {
 	
 	public void shareSelectedFile() {
 		//TODO: Prompt for usernames/emails of users
+		String usernameToShareWith = JOptionPane.showInputDialog("Username of user to share with:");
 		for (Integer i: fileJList.getSelectedIndices()) {
 			try {
 				File f = new File((String)fileList.get(i));
-				parent.getController().shareFile(f.getName(), f.getCanonicalPath(), f.length());
+				parent.getController().shareFile(f.getName(), f.getCanonicalPath(), f.length(), usernameToShareWith);
 			}
 			catch(IOException e) {
 				e.printStackTrace();

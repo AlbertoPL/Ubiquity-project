@@ -21,7 +21,7 @@ public interface Serviceable {
 	public void backupSuccess(boolean success, String filepath);
 	
 	//view calls shareFile so that the server proxy sends a message to share a particular file
-	public void shareFile(String filename, String filepath, long filesize);
+	public void shareFile(String filename, String filepath, long filelength, String usernameToShareWith);
 	
 	//server proxy calls shareSuccess to let the view know that the sharing of a particular
 	//file succeeded

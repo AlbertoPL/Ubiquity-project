@@ -1,7 +1,5 @@
 package message;
 
-import java.util.concurrent.ConcurrentMap;
-
 import file.UbiquityFileData;
 
 public class StringMapMessage extends Message {

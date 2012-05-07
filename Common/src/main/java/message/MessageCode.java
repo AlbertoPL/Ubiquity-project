@@ -29,6 +29,8 @@ public class MessageCode {
 	public static final int REQUEST_FILES_OF_TYPE = 10; //request files of a certain filetype
 	
 	public static final int FILE = 11; //a file message, contains file data
+	
+	public static final int SHARE_FILE = 12;
 	/*public static final int SERVER_REQUEST_AUTH = 0; //being asked for authentication
 	public static final int SERVER_ACCEPT_AUTH = 1; //authentication was accepted
 	public static final int SERVER_REJECT_AUTH = 2; //authentication was rejected

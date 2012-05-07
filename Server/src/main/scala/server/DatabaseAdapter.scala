@@ -19,4 +19,5 @@ trait DatabaseAdapter {
     deviceName: String): Long
   def insertDevice(devicename: String, macaddr: String, userid: Int)
   def getDevices(userid: Int): Array[String]
+  def shareFile(userid: Int, usertoshare: String, filename: String, filepath: String, filelength: Long, deviceName: String)
 }

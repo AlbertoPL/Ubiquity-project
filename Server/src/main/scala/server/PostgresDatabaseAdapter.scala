@@ -642,4 +642,77 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
         getdevicesProc.close
     objects
   }
+  
+  override def shareFile(userid: Int, usertoshare: String, filename: String, filepath: String, filelength: Long, deviceName: String) {
+	   var conn: Connection = null
+    var getUser: PreparedStatement = null
+    
+    try {
+      conn = DriverManager.getConnection("jdbc:postgresql:ubiquity",
+        PostgresDatabaseAdapter.props)
+    } catch {
+      case sqle: SQLException => sqle.printStackTrace
+    }
+    var getfileid: PreparedStatement = null
+    var getdeviceid: PreparedStatement = null
+    
+    //var insertString = "INSERT INTO file(\"name\", device, path, " +
+      //    "\"user\", \"type\", size) values(?,?,?,?,?,?)"
+        var getfileidstring = "SELECT fileid FROM filepath WHERE deviceid = ? AND filepath = ?"
+        var getdeviceidstring = "SELECT deviceid FROM devices WHERE devicename = ?"
+          
+        if (conn != null) {
+          try {
+            //insertIndexFiles = conn.prepareStatement(insertString)
+            getdeviceid = conn.prepareStatement(getdeviceidstring)
+            getfileid = conn.prepareStatement(getfileidstring)
+            conn.setAutoCommit(false)
+
+          }catch {
+            case sqle: SQLException => sqle.printStackTrace
+          }
+          
+          getdeviceid.setString(1, deviceName);
+          var rs = getdeviceid.executeQuery
+          conn.commit
+          var deviceid: Int = 0
+          var fileid: Int = 0
+          while (rs.next) {
+            deviceid = rs.getInt("deviceid")
+          }
+          getdeviceid.close()
+          getfileid.setInt(1, deviceid);
+          getfileid.setString(2, filepath);
+          rs = getfileid.executeQuery();
+          conn.commit
+          while (rs.next) {
+            fileid = rs.getInt("fileid")
+          }
+          
+          getfileid.close()
+          
+          if (fileid == 0) {
+            //TODO: Need userid and filelength!
+            storeFileInDatabase(userid, filename, filepath, filelength, deviceName)
+            shareFile(userid, usertoshare, filename, filepath, filelength, deviceName)
+          }
+          else {
+          var selectuseridbyusernameProc: CallableStatement = conn.prepareCall("{ ? = call selectuseridbyusername( ? ) }");
+        selectuseridbyusernameProc.registerOutParameter(1, Types.INTEGER);
+        selectuseridbyusernameProc.setString(2, usertoshare);
+       
+		    
+	        selectuseridbyusernameProc.execute();
+	        var usertosharewithid: Int = selectuseridbyusernameProc.getInt(1);
+	        selectuseridbyusernameProc.close();  
+	            var shareFile: PreparedStatement = conn.prepareCall("insert into sharedfile(userid, fileid) values(?,?) ");
+	        shareFile.setInt(1, usertosharewithid);
+	        shareFile.setInt(2, fileid);
+	        shareFile.executeUpdate()
+	        conn.commit
+	        shareFile.close()
+        }
+        }
+    
+  }
 }

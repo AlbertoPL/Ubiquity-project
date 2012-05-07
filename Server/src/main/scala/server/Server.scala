@@ -4,12 +4,11 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
-import java.rmi.RemoteException
-import java.util.ArrayList
 import java.util.List
-import message.Message
+
 import org.apache.commons.configuration.ConfigurationException
 import org.apache.commons.configuration.PropertiesConfiguration
+
 import message.FileMessage
 
 /**
@@ -19,7 +18,7 @@ import message.FileMessage
  * including the BackupAdapter, the DatabaseAdapter, and the FileServer.
  */
 object Server {
-  val serverPropertiesFilename = "src/main/resources/server.properties"
+  val serverPropertiesFilename = "server.properties"
   var validOsTypes: List[_] = _
 
   def main(args: Array[String]) {
@@ -60,6 +59,7 @@ class Server extends Runnable {
   }
 
   override def run {
+    System.out.println("Server has started!");
     var clientSocket: Socket = null
     while (running) {
       try {
