@@ -336,7 +336,7 @@ public class ScholarFrame extends JFrame implements View {
 			//projectFileMetadataMap.clear();
 			for (ProjectFile f: currentProject.getProjectFiles()) {
 				filePanel.addElement(f.getFilePath());
-				projectFileMetadataMap.put(f.getFilePath(), new UbiquityFileData(f.getFileName(), f.getFilePath(), f.getFileSize()));
+				projectFileMetadataMap.put(f.getFilePath(), new UbiquityFileData(f.getFileName(), f.getFilePath(), f.getFileSize(), -1));
 			}
 			changeTitle();
 		}
@@ -487,6 +487,10 @@ public class ScholarFrame extends JFrame implements View {
 			invalidate();
 			validate();
 		}
+	}
+	
+	public int getFilePathOwnerId(String filepath) {
+		return projectFileMetadataMap.get(filepath).getOwnerid();
 	}
 	
 	public long getFilePathLength(String filepath) {

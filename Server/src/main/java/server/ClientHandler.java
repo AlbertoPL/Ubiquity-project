@@ -15,6 +15,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import message.FileMessage;
 import message.Message;
@@ -129,8 +131,14 @@ public class ClientHandler implements Runnable {
 						    	//TODO: if the file is backed up, retrieve from our servers
 						    	String filename = ((FileMessage)m).getFilename();
 						    	String filepath = ((FileMessage)m).getFilepath();
-						    	String[] devices = database.getDevices(userId);
-						    	//TODO: iterate through devices, signing up as a publisher of the correct one/all of them
+						    	int ownerid = (int) ((FileMessage)m).getFilelength();
+						    	String[] devices;
+						    	if (ownerid > 0) {
+						    		devices = database.getDevices(ownerid);
+						    	}
+						    	else {
+						    		devices = database.getDevices(userId);
+						    	}
 						    	for (String device: devices) {
 						    		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 									ObjectOutput out = new ObjectOutputStream(bos);   
@@ -148,9 +156,17 @@ public class ClientHandler implements Runnable {
 						    	int filetypeid = ((RequestMessage) m).getMetacode();
 						    	int userid = ((RequestMessage) m).getUserid();
 						    	UbiquityFileData[] files = database.getAllFilesOfType(userid, filetypeid);
+						    	List<UbiquityFileData> allFiles = new ArrayList<UbiquityFileData>();
+						    	UbiquityFileData[] sharedFiles = database.getAllSharedFilesOfType(userId, filetypeid);
+						    	for (UbiquityFileData u: files) {
+						    		allFiles.add(u);
+						    	}
+						    	for (UbiquityFileData u: sharedFiles) {
+						    		allFiles.add(u);
+						    	}
 						    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 								ObjectOutput out = new ObjectOutputStream(bos);   
-								Message newMessage = new StringMapMessage(MessageCode.REQUEST_FILES_OF_TYPE, filetypeid, files);
+								Message newMessage = new StringMapMessage(MessageCode.REQUEST_FILES_OF_TYPE, filetypeid, (UbiquityFileData[]) allFiles.toArray());
 								
 							    out.writeObject(newMessage);
 							    out.flush();

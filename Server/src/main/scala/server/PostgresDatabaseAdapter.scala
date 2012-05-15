@@ -629,7 +629,7 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
 		         try {
 			        var rs2 = selectfilepathProc.executeQuery();
 			       	while (rs2.next) {
-			       	    var filedata = new UbiquityFileData(filenames(i), rs2.getString("filepaths"), filelengths(i))
+			       	    var filedata = new UbiquityFileData(filenames(i), rs2.getString("filepaths"), filelengths(i), userid)
 			       		objects :+= filedata
 			       	}
 		         }
@@ -692,7 +692,6 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
           getfileid.close()
           
           if (fileid == 0) {
-            //TODO: Need userid and filelength!
             storeFileInDatabase(userid, filename, filepath, filelength, deviceName)
             shareFile(userid, usertoshare, filename, filepath, filelength, deviceName)
           }
@@ -715,4 +714,120 @@ class PostgresDatabaseAdapter extends DatabaseAdapter {
         }
     
   }
+  
+   override def getAllSharedFiles(userid: Int) = {
+      var conn: Connection = null
+    var getUser: PreparedStatement = null
+    var objects: Array[UbiquityFileData] = Array.empty[UbiquityFileData]
+    
+    try {
+      conn = DriverManager.getConnection("jdbc:postgresql:ubiquity",
+        PostgresDatabaseAdapter.props)
+    } catch {
+      case sqle: SQLException => sqle.printStackTrace
+    }
+
+    
+    var fileids: Array[Int] = Array.empty[Int]
+    var filenames: Array[String] = Array.empty[String]
+    var filelengths: Array[Long] = Array.empty[Long]
+    
+    var getsharedfilesProc: PreparedStatement = conn.prepareCall("select * from sharedfile where userid = ?");
+        getsharedfilesProc.setInt(1, userid);
+
+        System.out.println("Userid: " + userid);
+       try {
+	        var rs = getsharedfilesProc.executeQuery();
+	       	while (rs.next) {
+	       		fileids :+= rs.getInt("fileid")
+	       	}
+       }
+        catch {
+        case sqle: PSQLException => sqle.printStackTrace
+    }
+        getsharedfilesProc.close();
+    
+
+	for (i <- 0 until fileids.length) {
+	      var getfilesProc: PreparedStatement = conn.prepareStatement("select * from files WHERE fileid = ?")
+
+	      getfilesProc.setInt(1, fileids(i));
+	      try {
+			        var rs2 = getfilesProc.executeQuery();
+			       	while (rs2.next) {
+				       	    var getuseridProc: PreparedStatement = conn.prepareStatement("select * from userfilereln WHERE fileid = ?");
+			       			getuseridProc.setInt(1, fileids(i));
+			       			var temprs = getuseridProc.executeQuery();
+			       			while (temprs.next) {
+					       	    var filedata = new UbiquityFileData(filenames(i), rs2.getString("filepaths"), filelengths(i), temprs.getInt("userid"))
+					       		objects :+= filedata
+			       			}
+			       	}
+		         }
+	      catch {
+		        	case sqle: PSQLException => sqle.printStackTrace
+			    }
+		      	getfilesProc.close
+	}   
+    objects
+    }
+    
+    override def getAllSharedFilesOfType(userid: Int, typeid: Int) = {
+      var conn: Connection = null
+    var getUser: PreparedStatement = null
+    var objects: Array[UbiquityFileData] = Array.empty[UbiquityFileData]
+    
+    try {
+      conn = DriverManager.getConnection("jdbc:postgresql:ubiquity",
+        PostgresDatabaseAdapter.props)
+    } catch {
+      case sqle: SQLException => sqle.printStackTrace
+    }
+
+    
+    var fileids: Array[Int] = Array.empty[Int]
+    var filenames: Array[String] = Array.empty[String]
+    var filelengths: Array[Long] = Array.empty[Long]
+    
+    var getsharedfilesProc: PreparedStatement = conn.prepareCall("select * from sharedfile where userid = ?");
+        getsharedfilesProc.setInt(1, userid);
+
+        System.out.println("Userid: " + userid);
+       try {
+	        var rs = getsharedfilesProc.executeQuery();
+	       	while (rs.next) {
+	       		fileids :+= rs.getInt("fileid")
+	       	}
+       }
+        catch {
+        case sqle: PSQLException => sqle.printStackTrace
+    }
+        getsharedfilesProc.close();
+    
+
+	for (i <- 0 until fileids.length) {
+	      var getfilesProc: PreparedStatement = conn.prepareStatement("select * from files WHERE fileid = ?")
+
+	      getfilesProc.setInt(1, fileids(i));
+	      try {
+			        var rs2 = getfilesProc.executeQuery();
+			       	while (rs2.next) {
+			       	    if (rs2.getInt("typeid") == typeid) {
+			       	      var getuseridProc: PreparedStatement = conn.prepareStatement("select * from userfilereln WHERE fileid = ?");
+			       			getuseridProc.setInt(1, fileids(i));
+			       			var temprs = getuseridProc.executeQuery();
+			       			while (temprs.next) {
+					       	    var filedata = new UbiquityFileData(filenames(i), rs2.getString("filepaths"), filelengths(i), temprs.getInt("userid"))
+					       		objects :+= filedata
+			       			}
+			       	    }
+			       	}
+		         }
+	      catch {
+		        	case sqle: PSQLException => sqle.printStackTrace
+			    }
+		      	getfilesProc.close
+	}   
+    objects
+    }
 }

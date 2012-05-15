@@ -57,7 +57,7 @@ public class ProjectPanelListener implements ActionListener {
 						frame.clean();
 					}
 					else if (frame.isConnected()){
-						frame.getController().getRemoteFile(path);
+						frame.getController().getRemoteFile(path, frame.getFilePathOwnerId(path));
 						
 						do {
 							f = new File(frame.getController().getRemoteFileStore() + frame.getProjectPanel().getSelectedProjectName() + ".uprj");
@@ -87,7 +87,7 @@ public class ProjectPanelListener implements ActionListener {
 							frame.clean();
 						}
 						else if (frame.isConnected()){
-							frame.getController().getRemoteFile(path);
+							frame.getController().getRemoteFile(path, frame.getFilePathOwnerId(path));
 							f = new File(frame.getController().getRemoteFileStore() + frame.getProjectPanel().getSelectedProjectName() + ".uprj");
 							while (f.length() < frame.getFilePathLength(path)) {
 								try {
@@ -142,7 +142,7 @@ public class ProjectPanelListener implements ActionListener {
 							frame.clean();
 						}
 						else if (frame.isConnected()){
-							frame.getController().getRemoteFile(path);
+							frame.getController().getRemoteFile(path, frame.getFilePathOwnerId(path));
 							f = new File(frame.getController().getRemoteFileStore() + frame.getProjectPanel().getSelectedProjectName() + ".uprj");
 							while (f.length() < frame.getFilePathLength(path)) {
 								try {
@@ -164,6 +164,10 @@ public class ProjectPanelListener implements ActionListener {
 		}
 		else if (command.equals("Open All")) {
 			//frame.getFilePanel().openAllFiles();
+		}
+		else if (command.equals("Share")) {
+			frame.getProjectPanel().shareSelectedProject();
+
 		}
 	}
 

@@ -181,8 +181,8 @@ public class FilesPanel extends JPanel {
 					ProjectFile pf = parent.getCurrentProject().getProjectFile(f.getCanonicalPath());
 
 				}
-				else if (parent.isConnected()) {
-					parent.getController().getRemoteFile((String) fileList.get(i));
+				else if (parent.getFilePathOwnerId((String) fileList.get(i)) > 0 && parent.isConnected()) {
+					parent.getController().getRemoteFile((String) fileList.get(i), parent.getFilePathOwnerId((String) fileList.get(i)));
 					final String filepath = (String) fileList.get(i);
 					new Thread(new Runnable() {
 

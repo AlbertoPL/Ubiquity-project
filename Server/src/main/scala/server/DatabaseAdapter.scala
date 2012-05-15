@@ -10,7 +10,7 @@ trait DatabaseAdapter {
   def storeIndexInDatabase(username: String, filename: String,
     deviceName: String)
   def storeFileInDatabase(userid: Int, filename: String, filepath: String, filesize: Long, devicename: String)
-  def getAllFilesOfType(userid: Int, fileid: Int): Array[UbiquityFileData];
+  def getAllFilesOfType(userid: Int, fileid: Int): Array[UbiquityFileData]
   def login(username: String, passwordHash: String): Int
   def selectAllFilesFromUser(username: String): Vector[Array[String]]
   def userExists(username: String): Boolean
@@ -20,4 +20,6 @@ trait DatabaseAdapter {
   def insertDevice(devicename: String, macaddr: String, userid: Int)
   def getDevices(userid: Int): Array[String]
   def shareFile(userid: Int, usertoshare: String, filename: String, filepath: String, filelength: Long, deviceName: String)
+  def getAllSharedFiles(userid: Int): Array[UbiquityFileData]
+  def getAllSharedFilesOfType(userid: Int, typeid: Int): Array[UbiquityFileData]
 }

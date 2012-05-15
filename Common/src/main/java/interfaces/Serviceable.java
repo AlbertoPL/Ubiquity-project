@@ -46,7 +46,7 @@ public interface Serviceable {
 	public void reconnect();
 	
 	//view calls getRemoteFile to get a file from another device sent over
-	public void getRemoteFile(String filepath);
+	public void getRemoteFile(String filepath, int ownerid);
 	
 	//view calls this to get the location of stored remote files
 	public String getRemoteFileStore();

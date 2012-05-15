@@ -131,8 +131,8 @@ public class ClientViewController implements Serviceable {
 	}
 	
 	@Override
-	public void getRemoteFile(String filepath) {
-		client.getRemoteFile(filepath);
+	public void getRemoteFile(String filepath, int ownerid) {
+		client.getRemoteFile(filepath, ownerid);
 	}
 	
 	@Override

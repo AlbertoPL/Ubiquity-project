@@ -689,10 +689,18 @@ def startWithDefaults(defaults: Properties) {
     messageSender.enqueueMessage(m);
   }*/
   
-  def getRemoteFile(filepath : String) {
+  def getRemoteFile(filepath : String, ownerid: Int) {
     System.out.println("File to retrieve: " + filepath);
-    var m = new FileMessage(MessageCode.REQUEST_FILE, filepath, filepath, 0, null);
-	  var bos = new ByteArrayOutputStream();
+    System.out.println("Userid of owner: " + ownerid);
+    //if we pass greater than 0 with null as the payload, we mean ownerid
+
+    var m: FileMessage = if (ownerid > 0) {
+    	new FileMessage(MessageCode.REQUEST_FILE, filepath, filepath, ownerid, null);
+    }
+    else {
+       new FileMessage(MessageCode.REQUEST_FILE, filepath, filepath, 0, null);
+    }
+      var bos = new ByteArrayOutputStream();
 	  var out = new ObjectOutputStream(bos);   
 	  out.writeObject(m);
 	  out.flush();

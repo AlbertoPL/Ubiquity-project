@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -139,5 +140,18 @@ public class ProjectsPanel extends JPanel {
 	
 	public String getSelectedProjectName() {
 		return selectedProjectName;
+	}
+	
+	public void shareSelectedProject() {
+		String usernameToShareWith = JOptionPane.showInputDialog("Username of user to share with:");
+		for (Integer i: projectJList.getSelectedIndices()) {
+			try {
+				File f = new File(parent.getProjectPath((String) projectList.get(i)));
+				parent.getController().shareFile(f.getName(), f.getCanonicalPath(), f.length(), usernameToShareWith);
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
